@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Daftar Akun{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="text-center fw-bold mb-4" style="color: #2F4F4F;">Daftar Akun Baru</h3>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" name="nama" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email (sebagai Username)</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nomor WhatsApp</label>
+                            <input type="text" name="no_wa" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary-custom">Daftar Sekarang</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small>Sudah punya akun? <a href="{% url 'login' %}">Login disini</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

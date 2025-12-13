@@ -1,0 +1,176 @@
+{% extends 'core/base.html' %}
+{% load rupiah_filters %}
+
+{% block title %}Solusi Dokumen Cepat{% endblock %}
+
+{% block content %}
+<section style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); padding: 120px 0 100px; color: white; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -50px; right: -50px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%;"></div>
+    
+    <div class="container text-center position-relative">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="mb-4">
+                    <i class="bi bi-shield-check" style="font-size: 4rem; color: var(--accent-gold);"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-4 text-white">Urus Dokumen Lebih <span style="color: var(--accent-gold); font-style: italic;">Mudah</span></h1>
+                <p class="lead mb-5 text-white-50">
+                    Hemat waktu berharga Anda. Layanan pengurusan STNK, BPKB, dan SIM dengan transparansi penuh dan layanan antar-jemput dokumen.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'pilih_layanan' %}" class="btn btn-gold btn-lg px-5 py-3 rounded-3 shadow-lg">
+                        Ajukan Sekarang
+                    </a>
+                    <a href="#daftar-layanan" class="btn btn-outline-light btn-lg px-5 py-3 rounded-3">
+                        Lihat Harga
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="daftar-layanan" class="py-5" style="background-color: #fff;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h6 class="text-uppercase text-muted fw-bold ls-2" style="letter-spacing: 2px; font-size: 0.8rem;">Daftar Layanan</h6>
+            <h2 class="fw-bold display-6" style="color: var(--primary-green);">Pilih Kebutuhan Anda</h2>
+            <div class="mx-auto mt-3 rounded-pill" style="width: 60px; height: 4px; background-color: var(--accent-gold);"></div>
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for layanan in layanan_list %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm hover-up" style="transition: transform 0.3s;">
+                    <div class="card-body text-center p-5 d-flex flex-column">
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light" style="width: 80px; height: 80px;">
+                                <i class="bi bi-file-earmark-text fs-1" style="color: var(--primary-green);"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">{{ layanan.nama_layanan }}</h5>
+                        <p class="text-muted small mb-4"><i class="bi bi-clock me-1"></i> {{ layanan.estimasi_waktu|default:"Proses Cepat" }}</p>
+                        
+                        <h3 class="fw-bold mb-1" style="color: var(--text-dark);">
+                            {{ layanan.harga_jasa|rupiah }}
+                        </h3>
+                        <small class="text-muted mb-4 d-block">*Jasa Admin</small>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'form_pengajuan' layanan.id %}" class="btn btn-outline-success w-100 fw-bold py-2" style="border-color: var(--primary-green); color: var(--primary-green);">
+                                Pilih Layanan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="text-muted">
+                    <i class="bi bi-cone-striped display-4 mb-3 d-block"></i>
+                    <p>Layanan sedang diperbarui.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background-color: #f3f4f6;">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-md-6">
+                <h2 class="fw-bold mb-4" style="color: var(--primary-green);">Kenapa BiroJasaApp?</h2>
+                
+                <div class="d-flex mb-4">
+                    <div class="me-4">
+                        <div class="rounded-3 bg-white shadow-sm p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-phone-vibrate fs-3" style="color: var(--accent-gold);"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Monitoring Real-time</h5>
+                        <p class="text-muted mb-0">Pantau posisi dokumen Anda (Kantor/Samsat) langsung dari HP.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-4">
+                    <div class="me-4">
+                        <div class="rounded-3 bg-white shadow-sm p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-shield-check fs-3" style="color: var(--accent-gold);"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Keamanan Terjamin</h5>
+                        <p class="text-muted mb-0">Dokumen fisik Anda kami simpan dengan prosedur keamanan ketat.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="me-4">
+                        <div class="rounded-3 bg-white shadow-sm p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-truck fs-3" style="color: var(--accent-gold);"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Antar Jemput Dokumen</h5>
+                        <p class="text-muted mb-0">Opsi pengiriman kurir tersedia untuk Anda yang sibuk.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <div class="p-5 bg-white rounded-4 shadow-sm">
+                    <i class="bi bi-award text-success" style="font-size: 10rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-white border-top">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <h6 class="text-uppercase text-muted fw-bold mb-2" style="letter-spacing: 1px; font-size: 0.8rem;">Kunjungi Kami</h6>
+                <h2 class="fw-bold mb-4" style="color: var(--primary-green);">Lokasi Kantor</h2>
+                <p class="text-muted mb-5">
+                    Silakan datang untuk konsultasi gratis atau menyerahkan dokumen fisik secara langsung.
+                </p>
+                
+                <div class="d-flex align-items-start mb-4">
+                    <i class="bi bi-geo-alt-fill fs-4 me-3" style="color: var(--accent-gold);"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Alamat Kantor Pusat</h6>
+                        <p class="text-muted mb-0">Jl. Soekarno Hatta No. 123,<br>Bandung, Jawa Barat 40286</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start mb-4">
+                    <i class="bi bi-clock-fill fs-4 me-3" style="color: var(--accent-gold);"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Jam Operasional</h6>
+                        <p class="text-muted mb-0">Senin - Jumat: 08.00 - 16.00 WIB<br>Sabtu: 08.00 - 13.00 WIB</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-whatsapp fs-4 me-3" style="color: var(--accent-gold);"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1">Customer Service</h6>
+                        <p class="text-muted mb-0">+62 812-3456-7890</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card border-0 shadow overflow-hidden rounded-4 h-100">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126748.56347862248!2d107.57311704235408!3d-6.903444341687889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e6398252477f%3A0x146a1f93d3e815b2!2sBandung%2C%20Bandung%20City%2C%20West%20Java!5e0!3m2!1sen!2sid!4v1709229139144!5m2!1sen!2sid" 
+                        width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends 'core/base.html' %}
+{% block title %}Masuk / Daftar{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center" style="min-height: 80vh;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-5 col-lg-4">
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div style="height: 6px; background: var(--accent-gold);"></div>
+
+                <div class="card-body p-5">
+
+                    <div id="login-section" class="text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-shield-lock text-success"
+                                style="font-size: 3rem; color: var(--primary-green) !important;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2" style="color: var(--primary-green);">Selamat Datang</h3>
+                        <p class="text-muted mb-4 small">Kelola dokumen kendaraan Anda dengan mudah.</p>
+
+                        <button id="btn-google-login"
+                            class="btn btn-outline-dark w-100 py-3 d-flex align-items-center justify-content-center gap-3 rounded-3 border-2"
+                            style="transition: 0.3s;">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"
+                                alt="Google">
+                            <span class="fw-bold">Lanjutkan dengan Google</span>
+                        </button>
+
+                        <div class="mt-4 text-center">
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                Dengan masuk, Anda menyetujui <a href="#"
+                                    class="text-decoration-none text-success fw-bold">Syarat & Ketentuan</a> kami.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="register-section" class="d-none">
+                        <h4 class="fw-bold mb-2 text-center" style="color: var(--primary-green);">Lengkapi Profil</h4>
+                        <p class="text-muted small text-center mb-4">Satu langkah lagi untuk menyelesaikan pendaftaran.
+                        </p>
+
+                        <form id="form-lengkapi-data">
+                            <div class="form-floating mb-3">
+                                <input type="text" id="reg-email" class="form-control" readonly
+                                    style="background-color: #f3f4f6;">
+                                <label for="reg-email">Email Google</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" id="reg-nama" class="form-control" required
+                                    placeholder="Nama Lengkap">
+                                <label for="reg-nama">Nama Lengkap (Sesuai KTP)</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="number" id="reg-wa" class="form-control" required placeholder="0812...">
+                                <label for="reg-wa">Nomor WhatsApp Aktif</label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary-custom btn-lg shadow-sm">
+                                    Simpan & Masuk
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="loading-msg" class="mt-4 text-center text-muted d-none">
+                        <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                        <small id="loading-text">Memproses data...</small>
+                    </div>
+
+                    <div id="error-msg"
+                        class="mt-3 text-center text-danger d-none small bg-danger bg-opacity-10 p-2 rounded"></div>
+
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="text-muted small text-decoration-none">← Kembali ke Beranda</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // ... (PASTE KODE SCRIPT JAVASCRIPT YANG SUDAH BERJALAN DI SINI) ...
+    // ... (Pastikan logic JS-nya tidak hilang) ...
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "{{ firebase_api_key }}",
+        authDomain: "{{ firebase_auth_domain }}",
+        projectId: "{{ firebase_project_id }}",
+        storageBucket: "{{ firebase_storage_bucket }}",
+        messagingSenderId: "{{ firebase_messaging_sender_id }}",
+        appId: "{{ firebase_app_id }}",
+        measurementId: "{{ firebase_measurement_id }}"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentIdToken = null;
+
+    document.getElementById('btn-google-login').addEventListener('click', () => {
+        showLoading(true, 'Menghubungkan ke Google...');
+        hideError();
+
+        signInWithPopup(auth, provider)
+            .then(async (result) => {
+                currentIdToken = await result.user.getIdToken();
+                checkUserStatus(currentIdToken);
+            })
+            .catch((error) => {
+                showLoading(false);
+                showError('Gagal login Google: ' + error.message);
+            });
+    });
+
+    function checkUserStatus(token) {
+        showLoading(true, 'Mengecek akun...');
+
+        fetch('/api/firebase-auth/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: token })
+        })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url;
+                } else if (data.status === 'need_register') {
+                    showRegisterForm(data.email, data.google_name);
+                } else {
+                    showError(data.message);
+                }
+            })
+            .catch(err => {
+                showLoading(false);
+                showError('Error server: ' + err);
+            });
+    }
+
+    function showRegisterForm(email, suggestedName) {
+        document.getElementById('login-section').classList.add('d-none');
+        document.getElementById('register-section').classList.remove('d-none');
+        document.getElementById('reg-email').value = email;
+        document.getElementById('reg-nama').value = suggestedName;
+    }
+
+    document.getElementById('form-lengkapi-data').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const nama = document.getElementById('reg-nama').value;
+        const wa = document.getElementById('reg-wa').value;
+        if (!nama || !wa) { showError("Nama dan No WhatsApp wajib diisi!"); return; }
+
+        showLoading(true, 'Mendaftarkan akun...');
+
+        fetch('/api/firebase-auth/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: currentIdToken, nama: nama, no_wa: wa })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url;
+                } else {
+                    showLoading(false);
+                    showError(data.message);
+                }
+            });
+    });
+
+    function showLoading(show, text = '') {
+        const el = document.getElementById('loading-msg');
+        const txt = document.getElementById('loading-text');
+        if (show) { el.classList.remove('d-none'); txt.innerText = text; } else { el.classList.add('d-none'); }
+    }
+    function showError(msg) {
+        const errDiv = document.getElementById('error-msg');
+        errDiv.innerText = msg;
+        errDiv.classList.remove('d-none');
+        document.getElementById('loading-msg').classList.add('d-none');
+    }
+    function hideError() { document.getElementById('error-msg').classList.add('d-none'); }
+</script>
+{% endblock %}

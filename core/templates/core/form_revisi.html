@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+{% block title %}Revisi Permohonan{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    ✏️ Revisi Pengajuan: {{ permohonan.kode_permohonan }}
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="alert alert-danger">
+                        <strong>Alasan Penolakan Sebelumnya:</strong><br>
+                        {{ permohonan.catatan_penolakan }}
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <h6 class="fw-bold text-dark mb-3">Perbarui Dokumen:</h6>
+                        
+                        {% for syarat in syarat_dokumen %}
+                        <div class="mb-4 border-bottom pb-3">
+                            <label class="form-label fw-bold">
+                                {{ forloop.counter }}. {{ syarat.master_dokumen.nama_dokumen }}
+                            </label>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">Status: File Tersimpan</span>
+                                </div>
+
+                            <input type="file" name="file_{{ syarat.master_dokumen.id }}" class="form-control border-warning">
+                            <div class="form-text text-muted">Upload file baru <b>HANYA JIKA</b> ingin mengganti yang lama.</div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Catatan Revisi (Opsional)</label>
+                            <textarea name="catatan" class="form-control" rows="2">{{ permohonan.catatan_pelanggan }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg fw-bold">
+                                Kirim Revisi ➔
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

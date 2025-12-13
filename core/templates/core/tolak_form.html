@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block title %}Tolak Permohonan{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white fw-bold">
+                    ⛔ Konfirmasi Penolakan
+                </div>
+                <div class="card-body p-4">
+                    <p>Anda akan menolak permohonan <strong>{{ item.kode_permohonan }}</strong> milik <strong>{{ item.pelanggan.nama }}</strong>.</p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Alasan Penolakan (Wajib Diisi)</label>
+                            <textarea name="alasan" class="form-control" rows="4" placeholder="Contoh: Foto KTP buram, mohon upload ulang yang jelas." required></textarea>
+                            <div class="form-text text-danger">Alasan ini akan dikirimkan ke email pelanggan.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Konfirmasi Tolak</button>
+                            <a href="{% url 'staff_dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

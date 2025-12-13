@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+{% block title %}Tagihan Pembayaran{% endblock %}
+{% load rupiah_filters %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h5 class="mb-0">TAGIHAN PEMBAYARAN</h5>
+                    <small>{{ pembayaran.nomor_invoice }}</small>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="mb-4">
+                        <label class="text-muted small">Layanan</label>
+                        <h5 class="fw-bold">{{ permohonan.layanan.nama_layanan }}</h5>
+                        <p>{{ permohonan.pelanggan.nama }}</p>
+                    </div>
+
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Biaya Jasa Admin
+                            <span>{{ permohonan.layanan.harga_jasa|rupiah }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Biaya Resmi (Pajak/PNBP)
+                            <span>{{ permohonan.biaya_resmi|rupiah }}</span>
+                        </li>
+                        {% if pembayaran.biaya_pengiriman %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Ongkos Kirim
+                            <span>{{ pembayaran.biaya_pengiriman|rupiah }}</span>
+                        </li>
+                        {% endif %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold">
+                            TOTAL BAYAR
+                            <span class="text-success fs-5">{{ pembayaran.total_biaya|rupiah }}</span>
+                        </li>
+                    </ul>
+
+                    {% if pembayaran.status_pembayaran == 'pending' %}
+                        <p class="text-center mb-3">Pilih Metode Pembayaran:</p>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" name="metode" value="online" class="btn btn-success btn-lg">
+                                    💳 Bayar Sekarang (Online)
+                                </button>
+                                
+                                <button type="submit" name="metode" value="tunai" class="btn btn-outline-secondary">
+                                    🏢 Bayar Tunai di Kantor
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-success text-center">
+                            <h4 class="alert-heading">LUNAS ✅</h4>
+                            <p>Terima kasih, pembayaran Anda telah kami terima.</p>
+                        </div>
+                        <div class="d-grid">
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary-custom">Kembali ke Dashboard</a>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

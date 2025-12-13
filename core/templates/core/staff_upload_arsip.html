@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+{% block title %}Upload Arsip Digital{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-primary">
+                <div class="card-header bg-primary text-white fw-bold">
+                    📂 Langkah 2: Digitalisasi Dokumen (Arsip)
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="alert alert-secondary mb-4">
+                        <strong>Permohonan:</strong> {{ permohonan.kode_permohonan }}<br>
+                        <strong>Pelanggan:</strong> {{ permohonan.pelanggan.nama }}<br>
+                        <strong>Layanan:</strong> {{ permohonan.layanan.nama_layanan }}
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <h6 class="fw-bold text-dark mb-3">Silakan Scan/Foto Dokumen Fisik:</h6>
+                        
+                        {% for syarat in syarat_dokumen %}
+                        <div class="mb-3 row align-items-center">
+                            <label class="col-sm-4 col-form-label fw-bold">
+                                {{ syarat.master_dokumen.nama_dokumen }}
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="file" name="file_{{ syarat.master_dokumen.id }}" class="form-control" required>
+                                <div class="form-text small">Upload hasil scan/foto dokumen asli.</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <p class="small text-muted mt-2">*Semua dokumen fisik wajib didigitalkan untuk keamanan.</p>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Simpan Arsip & Lanjut ➔
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
