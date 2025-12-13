@@ -19,7 +19,7 @@ def edit_profil_view(request):
         pelanggan.save()
         messages.success(request, "Profil diperbarui!")
         return redirect('dashboard')
-    return render(request, 'core/edit_profil.html', {'pelanggan': pelanggan})
+    return render(request, 'core/shared/edit_profil.html', {'pelanggan': pelanggan})
 
 @login_required(login_url='login')
 def detail_permohonan_view(request, permohonan_id):
@@ -40,7 +40,7 @@ def detail_permohonan_view(request, permohonan_id):
         'dokumen_list': dokumen_list,
         'pembayaran': pembayaran
     }
-    return render(request, 'core/detail_permohonan.html', context)
+    return render(request, 'core/shared/detail_permohonan.html', context)
 
 @login_required(login_url='login')
 def revisi_pengajuan_view(request, permohonan_id):
@@ -98,4 +98,4 @@ def revisi_pengajuan_view(request, permohonan_id):
         'permohonan': permohonan,
         'syarat_dokumen': syarat_dokumen
     }
-    return render(request, 'core/form_revisi.html', context)
+    return render(request, 'core/shared/form_revisi.html', context)

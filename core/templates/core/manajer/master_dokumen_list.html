@@ -1,0 +1,44 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Kelola Master Dokumen{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Kelola Master Dokumen</h3>
+        <a href="{% url 'master_dokumen_add' %}" class="btn btn-primary-custom">
+            + Tambah Dokumen Baru
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Nama Dokumen</th>
+                        <th>Deskripsi</th>
+                        <th class="text-end pe-4">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in master_dokumen_list %}
+                    <tr>
+                        <td class="ps-4 fw-bold">{{ item.nama_dokumen }}</td>
+                        <td>{{ item.deskripsi|default:"-" }}</td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'master_dokumen_edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="doc_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus master dokumen ini?')">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center py-4">Belum ada Master Dokumen yang terdaftar.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

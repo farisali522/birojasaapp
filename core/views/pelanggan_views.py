@@ -31,12 +31,12 @@ def dashboard_view(request):
     if pelanggan:
         permohonan_list = Permohonan.objects.filter(pelanggan=pelanggan).order_by('-created_at')
 
-    return render(request, 'core/dashboard.html', {'pelanggan': pelanggan, 'permohonan_list': permohonan_list})
+    return render(request, 'core/pelanggan/dashboard.html', {'pelanggan': pelanggan, 'permohonan_list': permohonan_list})
 
 @login_required(login_url='login')
 def pilih_layanan_view(request):
     layanan_list = Layanan.objects.all()
-    return render(request, 'core/pilih_layanan.html', {'layanan_list': layanan_list})
+    return render(request, 'core/pelanggan/pilih_layanan.html', {'layanan_list': layanan_list})
 
 @login_required(login_url='login')
 def form_pengajuan_view(request, layanan_id):
@@ -101,7 +101,7 @@ def form_pengajuan_view(request, layanan_id):
             messages.error(request, f"Gagal: {e}")
 
     context = { 'layanan': layanan_terpilih, 'syarat_dokumen': syarat_dokumen }
-    return render(request, 'core/form_pengajuan.html', context)
+    return render(request, 'core/pelanggan/form_pengajuan.html', context)
 
 @login_required(login_url='login')
 def tagihan_view(request, permohonan_id):
@@ -136,7 +136,7 @@ def tagihan_view(request, permohonan_id):
                 'permohonan': permohonan,
                 'pembayaran': pembayaran
             }
-            pdf_file = render_to_pdf('core/struk_lunas_pdf.html', pdf_context)
+            pdf_file = render_to_pdf('core/pdf/struk_lunas_pdf.html', pdf_context)
             
             # 4. Siapkan Email
             subjek = f"LUNAS: Pembayaran {permohonan.kode_permohonan} Berhasil"
@@ -189,4 +189,4 @@ def tagihan_view(request, permohonan_id):
         'permohonan': permohonan,
         'pembayaran': pembayaran
     }
-    return render(request, 'core/tagihan.html', context)
+    return render(request, 'core/pelanggan/tagihan.html', context)

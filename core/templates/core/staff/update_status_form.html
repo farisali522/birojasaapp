@@ -1,0 +1,53 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Update Status{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    Update Progres: {{ item.kode_permohonan }}
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-muted">Posisi saat ini: <strong>{{ item.status_proses }}</strong></p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <label class="form-label fw-bold mb-3">Pilih Status Terbaru:</label>
+                        
+                        <div class="d-grid gap-3">
+                            <button type="submit" name="status_baru" value="Proses di SAMSAT/SATPAS" class="btn btn-outline-primary text-start p-3">
+                                🏢 <strong>Proses di SAMSAT/SATPAS</strong><br>
+                                <small>Saya sudah sampai di lokasi dan sedang mengurus.</small>
+                            </button>
+
+                            <button type="submit" name="status_baru" value="Cek Fisik Selesai" class="btn btn-outline-info text-start p-3">
+                                🚗 <strong>Cek Fisik Selesai</strong><br>
+                                <small>Kendaraan sudah digesek dan divalidasi.</small>
+                            </button>
+
+                            <button type="submit" name="status_baru" value="Menunggu Cetak" class="btn btn-outline-warning text-dark text-start p-3">
+                                🖨️ <strong>Menunggu Cetak</strong><br>
+                                <small>Berkas sudah masuk, tinggal menunggu jadi.</small>
+                            </button>
+                            
+                            <hr>
+
+                            <button type="submit" name="status_baru" value="Selesai - Kembali ke Kantor" class="btn btn-success text-start p-3">
+                                ✅ <strong>Selesai & Kembali</strong><br>
+                                <small>Dokumen sudah jadi, saya otw balik ke kantor.</small>
+                            </button>
+                        </div>
+
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'lapangan_dashboard' %}" class="text-muted">Kembali</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

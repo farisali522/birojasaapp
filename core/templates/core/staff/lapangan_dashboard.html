@@ -1,0 +1,52 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Tugas Lapangan{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Halo, {{ karyawan.nama }} 👋</h4>
+        <span class="badge bg-dark">Petugas Lapangan</span>
+    </div>
+
+    <h5 class="text-muted mb-3">Daftar Tugas Aktif:</h5>
+
+    <div class="row g-3">
+        {% for item in daftar_tugas %}
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title fw-bold">{{ item.kode_permohonan }}</h5>
+                        <span class="badge bg-warning text-dark">{{ item.status_proses }}</span>
+                    </div>
+                    <p class="card-text mb-1">
+                        <strong>Layanan:</strong> {{ item.layanan.nama_layanan }}<br>
+                        <strong>Pelanggan:</strong> {{ item.pelanggan.nama }}<br>
+                        <strong>No WA:</strong> {{ item.pelanggan.no_whatsapp }}
+                        <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank" class="text-success text-decoration-none">
+                            (Chat WA)
+                        </a>
+                    </p>
+                    <hr>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{% url 'lapangan_detail' item.id %}" class="btn btn-outline-dark w-100">
+                                📂 Detail
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'update_status_lapangan' item.id %}" class="btn btn-primary w-100">
+                                🚀 Update
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Tidak ada tugas saat ini. Santai dulu! ☕</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

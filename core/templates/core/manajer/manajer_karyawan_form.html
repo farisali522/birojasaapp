@@ -1,0 +1,52 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Form Karyawan{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white fw-bold">
+                    {% if item %}Edit Data Karyawan{% else %}Tambah Karyawan Baru{% endif %}
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" name="nama" class="form-control" value="{{ item.nama }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email (Untuk Login Google)</label>
+                            <input type="email" name="email" class="form-control" value="{{ item.email }}" required>
+                            <div class="form-text">Pastikan email ini aktif dan terhubung dengan Google.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">No. WhatsApp</label>
+                            <input type="text" name="no_wa" class="form-control" value="{{ item.no_whatsapp }}">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Jabatan / Role</label>
+                            <select name="role" class="form-select" required>
+                                <option value="">-- Pilih Role --</option>
+                                <option value="staff_admin" {% if item.role == 'staff_admin' %}selected{% endif %}>Staff Administrasi</option>
+                                <option value="staff_keuangan" {% if item.role == 'staff_keuangan' %}selected{% endif %}>Staff Keuangan (Kasir)</option>
+                                <option value="lapangan" {% if item.role == 'lapangan' %}selected{% endif %}>Staff Lapangan</option>
+                                <option value="manajer" {% if item.role == 'manajer' %}selected{% endif %}>Manajer</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom">Simpan Data</button>
+                            <a href="{% url 'manajer_karyawan_list' %}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

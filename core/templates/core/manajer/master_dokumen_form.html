@@ -1,0 +1,33 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Form Master Dokumen{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white fw-bold">
+                    {% if is_edit %}Edit Dokumen: {{ item.nama_dokumen }}{% else %}Tambah Dokumen Baru{% endif %}
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Nama Dokumen (Contoh: KTP Asli)</label>
+                            <input type="text" name="nama_dokumen" class="form-control" value="{{ item.nama_dokumen }}" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Deskripsi / Keterangan</label>
+                            <textarea name="deskripsi" class="form-control" rows="3">{{ item.deskripsi }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom">Simpan Data</button>
+                            <a href="{% url 'master_dokumen_list' %}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

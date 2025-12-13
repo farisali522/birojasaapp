@@ -1,0 +1,42 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Edit Profil{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-bold">Edit Profil Saya</div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label>Kode Pelanggan</label>
+                            <input type="text" class="form-control" value="{{ pelanggan.kode_pelanggan }}" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label>Email (Login)</label>
+                            <input type="text" class="form-control" value="{{ pelanggan.email }}" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label>Nama Lengkap</label>
+                            <input type="text" name="nama" class="form-control" value="{{ pelanggan.nama }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>No. WhatsApp</label>
+                            <input type="number" name="no_wa" class="form-control" value="{{ pelanggan.no_whatsapp }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Alamat Lengkap (Untuk Pengiriman)</label>
+                            <textarea name="alamat" class="form-control" rows="3">{{ pelanggan.alamat_lengkap|default:'' }}</textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom">Simpan Perubahan</button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

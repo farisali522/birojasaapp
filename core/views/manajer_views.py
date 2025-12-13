@@ -62,7 +62,7 @@ def manajer_dashboard_view(request):
         'total_uang': total_uang,
         'status_stats': status_stats
     }
-    return render(request, 'core/manajer_dashboard.html', context)
+    return render(request, 'core/manajer/manajer_dashboard.html', context)
 
 @login_required(login_url='login')
 def laporan_keuangan_view(request):
@@ -87,7 +87,7 @@ def laporan_keuangan_view(request):
             writer.writerow([item.nomor_invoice, item.updated_at.strftime("%d-%m-%Y"), item.permohonan.pelanggan.nama, item.total_biaya])
         return response
 
-    return render(request, 'core/laporan.html', {'laporan': laporan, 'total_pemasukan': total_pemasukan, 'start_date': start_date, 'end_date': end_date})
+    return render(request, 'core/manajer/laporan.html', {'laporan': laporan, 'total_pemasukan': total_pemasukan, 'start_date': start_date, 'end_date': end_date})
 
 # 🔥 NEW: LAPORAN GABUNGAN (Operasional + Keuangan)
 @login_required(login_url='login')
@@ -191,7 +191,7 @@ def cetak_laporan_gabungan_view(request):
             'pembayaran_list': pembayaran_list[:20],  # Top 20
         }
         
-        pdf = render_to_pdf('core/laporan_gabungan_pdf.html', context)
+        pdf = render_to_pdf('core/pdf/laporan_gabungan_pdf.html', context)
         if pdf:
             response = HttpResponse(pdf, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="Laporan_{periode}_{today}.pdf"'
@@ -220,7 +220,7 @@ def cetak_laporan_gabungan_view(request):
         'total_pemasukan': total_pemasukan,
         'metode_stats': metode_stats,
     }
-    return render(request, 'core/cetak_laporan_gabungan.html', context)
+    return render(request, 'core/manajer/cetak_laporan_gabungan.html', context)
 
 
 # ==========================================
@@ -237,7 +237,7 @@ def manajer_karyawan_list_view(request):
     context = {
         'karyawan_list': karyawan_list
     }
-    return render(request, 'core/manajer_karyawan_list.html', context)
+    return render(request, 'core/manajer/manajer_karyawan_list.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -266,7 +266,7 @@ def manajer_karyawan_create_view(request):
         except:
             messages.error(request, "Email sudah terdaftar.")
     
-    return render(request, 'core/manajer_karyawan_form.html')
+    return render(request, 'core/manajer/manajer_karyawan_form.html')
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -281,7 +281,7 @@ def manajer_karyawan_edit_view(request, karyawan_id):
         messages.success(request, "Data karyawan diupdate.")
         return redirect('manajer_karyawan_list')
     
-    return render(request, 'core/manajer_karyawan_form.html', {'karyawan': karyawan})
+    return render(request, 'core/manajer/manajer_karyawan_form.html', {'karyawan': karyawan})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -304,7 +304,7 @@ def manajer_karyawan_delete_view(request, karyawan_id):
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_list_view(request):
     layanan_list = Layanan.objects.all().order_by('nama_layanan')
-    return render(request, 'core/master_layanan_list.html', {'layanan_list': layanan_list})
+    return render(request, 'core/manajer/master_layanan_list.html', {'layanan_list': layanan_list})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -330,7 +330,7 @@ def master_layanan_form_view(request, layanan_id=None):
             messages.success(request, "Layanan ditambahkan.")
         return redirect('master_layanan_list')
     
-    return render(request, 'core/master_layanan_form.html', {'layanan': layanan})
+    return render(request, 'core/manajer/master_layanan_form.html', {'layanan': layanan})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -362,7 +362,7 @@ def master_layanan_requirements_view(request, layanan_id):
         'current_syarat': current_syarat,
         'current_ids': current_ids
     }
-    return render(request, 'core/master_layanan_requirements.html', context)
+    return render(request, 'core/manajer/master_layanan_requirements.html', context)
 
 # ==========================================
 # MANAJER VIEWS - DOCUMENT MASTER DATA
@@ -378,7 +378,7 @@ def master_dokumen_list_view(request):
         return redirect('master_dokumen_list')
     
     dokumen_list = MasterDokumen.objects.all().order_by('nama_dokumen')
-    return render(request, 'core/master_dokumen_list.html', {'dokumen_list': dokumen_list})
+    return render(request, 'core/manajer/master_dokumen_list.html', {'dokumen_list': dokumen_list})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -400,4 +400,4 @@ def master_dokumen_form_view(request, doc_id=None):
         messages.success(request, "Data disimpan.")
         return redirect('master_dokumen_list')
     
-    return render(request, 'core/master_dokumen_form.html', {'dokumen': dokumen})
+    return render(request, 'core/manajer/master_dokumen_form.html', {'dokumen': dokumen})

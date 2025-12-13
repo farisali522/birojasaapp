@@ -22,7 +22,7 @@ def lapangan_dashboard_view(request):
         return redirect('dashboard')
 
     daftar_tugas = Permohonan.objects.filter(karyawan=karyawan).exclude(status_proses='Selesai').order_by('-updated_at')
-    return render(request, 'core/lapangan_dashboard.html', {'karyawan': karyawan, 'daftar_tugas': daftar_tugas})
+    return render(request, 'core/staff/lapangan_dashboard.html', {'karyawan': karyawan, 'daftar_tugas': daftar_tugas})
 
 @login_required(login_url='login')
 def update_status_lapangan_view(request, permohonan_id):
@@ -74,7 +74,7 @@ def update_status_lapangan_view(request, permohonan_id):
         messages.success(request, "Status diperbarui!")
         return redirect('lapangan_dashboard')
 
-    return render(request, 'core/update_status_form.html', {'item': permohonan})
+    return render(request, 'core/staff/update_status_form.html', {'item': permohonan})
 
 @login_required(login_url='login')
 def lapangan_detail_view(request, permohonan_id):
@@ -99,4 +99,4 @@ def lapangan_detail_view(request, permohonan_id):
         'item': permohonan,
         'dokumen_list': dokumen_list
     }
-    return render(request, 'core/lapangan_detail.html', context)
+    return render(request, 'core/staff/lapangan_detail.html', context)

@@ -37,7 +37,7 @@ def keuangan_dashboard_view(request):
         'history': history,
         'karyawan': karyawan
     }
-    return render(request, 'core/keuangan_dashboard.html', context)
+    return render(request, 'core/staff/keuangan_dashboard.html', context)
 
 @login_required(login_url='login')
 def konfirmasi_lunas_view(request, pembayaran_id):
@@ -80,7 +80,7 @@ def konfirmasi_lunas_view(request, pembayaran_id):
             'permohonan': permohonan,
             'pembayaran': pembayaran
         }
-        pdf_file = render_to_pdf('core/struk_lunas_pdf.html', pdf_context)
+        pdf_file = render_to_pdf('core/pdf/struk_lunas_pdf.html', pdf_context)
         
         # Kirim Email + Lampiran Struk
         subjek = f"LUNAS: Pembayaran {permohonan.kode_permohonan} Berhasil"

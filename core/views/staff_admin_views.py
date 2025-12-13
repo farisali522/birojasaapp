@@ -54,7 +54,7 @@ def staff_dashboard_view(request):
         'siap_finalisasi': siap_finalisasi,
         'sedang_berjalan': sedang_berjalan
     }
-    return render(request, 'core/staff_dashboard.html', context)
+    return render(request, 'core/staff/staff_dashboard.html', context)
 
 @login_required(login_url='login')
 def staff_input_walkin_view(request):
@@ -100,7 +100,7 @@ def staff_input_walkin_view(request):
             messages.error(request, f"Gagal: {e}")
 
     layanan_list = Layanan.objects.all()
-    return render(request, 'core/staff_input_walkin.html', {'layanan_list': layanan_list})
+    return render(request, 'core/staff/staff_input_walkin.html', {'layanan_list': layanan_list})
 
 @login_required(login_url='login')
 def staff_upload_arsip_view(request, permohonan_id):
@@ -126,7 +126,7 @@ def staff_upload_arsip_view(request, permohonan_id):
         messages.success(request, 'Arsip selesai. Lanjut verifikasi.')
         return redirect('verifikasi_permohonan', permohonan_id=permohonan.id)
 
-    return render(request, 'core/staff_upload_arsip.html', {'permohonan': permohonan, 'syarat_dokumen': syarat_dokumen})
+    return render(request, 'core/staff/staff_upload_arsip.html', {'permohonan': permohonan, 'syarat_dokumen': syarat_dokumen})
 
 @login_required(login_url='login')
 def verifikasi_permohonan_view(request, permohonan_id):
@@ -179,7 +179,7 @@ def verifikasi_permohonan_view(request, permohonan_id):
         }
 
         # 2. Generate PDF
-        pdf_file = render_to_pdf('core/invoice_pdf.html', pdf_context)
+        pdf_file = render_to_pdf('core/pdf/invoice_pdf.html', pdf_context)
         
         subjek = f"Tagihan Terbit: {permohonan.kode_permohonan}"
         pesan = f"""
@@ -225,7 +225,7 @@ def verifikasi_permohonan_view(request, permohonan_id):
         return redirect('staff_dashboard')
         
 
-    return render(request, 'core/verifikasi_form.html', {'item': permohonan, 'dokumen_list': permohonan.berkas_upload.all()})
+    return render(request, 'core/staff/verifikasi_form.html', {'item': permohonan, 'dokumen_list': permohonan.berkas_upload.all()})
 
 @login_required(login_url='login')
 def tugaskan_staff_view(request, permohonan_id):
@@ -251,7 +251,7 @@ def tugaskan_staff_view(request, permohonan_id):
         messages.success(request, f"Ditugaskan ke {petugas.nama}")
         return redirect('staff_dashboard')
 
-    return render(request, 'core/tugaskan_form.html', {'item': permohonan, 'staff_list': Karyawan.objects.filter(role='lapangan')})
+    return render(request, 'core/staff/tugaskan_form.html', {'item': permohonan, 'staff_list': Karyawan.objects.filter(role='lapangan')})
 
 @login_required(login_url='login')
 def finalisasi_permohonan_view(request, permohonan_id):
@@ -322,4 +322,4 @@ def tolak_permohonan_view(request, permohonan_id):
         messages.warning(request, f"Permohonan {permohonan.kode_permohonan} telah DITOLAK.")
         return redirect('staff_dashboard')
 
-    return render(request, 'core/tolak_form.html', {'item': permohonan})
+    return render(request, 'core/staff/tolak_form.html', {'item': permohonan})

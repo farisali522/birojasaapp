@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Helvetica, Arial, sans-serif; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #2F4F4F; padding-bottom: 10px; }
+        .header h1 { color: #2F4F4F; margin: 0; }
+        .header p { margin: 5px 0; font-size: 12px; }
+        
+        .info-box { width: 100%; margin-bottom: 20px; }
+        .info-box td { padding: 5px; vertical-align: top; }
+        
+        .invoice-details { background-color: #f8f9fa; padding: 10px; border: 1px solid #ddd; }
+        
+        .table-biaya { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table-biaya th { background-color: #2F4F4F; color: white; padding: 10px; text-align: left; }
+        .table-biaya td { border-bottom: 1px solid #ddd; padding: 10px; }
+        .total-row td { font-weight: bold; font-size: 16px; background-color: #eee; }
+        
+        .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INVOICE TAGIHAN</h1>
+        <p>BiroJasaApp Bandung - Solusi Dokumen Terpercaya</p>
+    </div>
+
+    <table class="info-box">
+        <tr>
+            <td width="60%">
+                <strong>Ditagihkan Kepada:</strong><br>
+                {{ permohonan.pelanggan.nama }}<br>
+                {{ permohonan.pelanggan.email }}<br>
+                {{ permohonan.pelanggan.no_whatsapp }}
+            </td>
+            <td width="40%" class="invoice-details">
+                <strong>No. Invoice:</strong> {{ pembayaran.nomor_invoice }}<br>
+                <strong>Tanggal:</strong> {% now "d M Y" %}<br>
+                <strong>Status:</strong> BELUM DIBAYAR
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table class="table-biaya">
+        <thead>
+            <tr>
+                <th>Keterangan Layanan</th>
+                <th style="text-align: right;">Jumlah (IDR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Jasa Pengurusan: {{ permohonan.layanan.nama_layanan }}</td>
+                <td style="text-align: right;">{{ permohonan.layanan.harga_jasa }}</td>
+            </tr>
+            <tr>
+                <td>Biaya Resmi (Pajak/PNBP)</td>
+                <td style="text-align: right;">{{ permohonan.biaya_resmi }}</td>
+            </tr>
+            
+            {% if pembayaran.biaya_pengiriman > 0 %}
+            <tr>
+                <td>Biaya Pengiriman (Kurir)</td>
+                <td style="text-align: right;">{{ pembayaran.biaya_pengiriman }}</td>
+            </tr>
+            {% endif %}
+            
+            <tr class="total-row">
+                <td>TOTAL TAGIHAN</td>
+                <td style="text-align: right;">Rp {{ pembayaran.total_biaya }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br><br>
+    <p>Silakan lakukan pembayaran melalui metode yang tersedia di aplikasi atau tunai di kantor kami.</p>
+
+    <div class="footer">
+        Dicetak otomatis oleh Sistem BiroJasaApp. Terima kasih atas kepercayaan Anda.
+    </div>
+</body>
+</html>

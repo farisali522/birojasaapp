@@ -1,0 +1,22 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Pilih Layanan{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h3 class="text-center fw-bold mb-4">Pilih Layanan yang Anda Butuhkan</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for item in layanan_list %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">{{ item.nama_layanan }}</h5>
+                    <p class="text-muted">Estimasi: {{ item.estimasi_waktu }}</p>
+                    {% load rupiah_filters %} <h4 class="text-primary">
+       {{ item.harga_jasa|rupiah }} </h4>
+                    <a href="{% url 'form_pengajuan' item.id %}" class="btn btn-outline-primary mt-3 w-100">Pilih Ini</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

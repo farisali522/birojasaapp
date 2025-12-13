@@ -1,0 +1,156 @@
+{% extends 'core/shared/base.html' %}
+{% load rupiah_filters %} 
+
+{% block title %}Verifikasi Dokumen{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        
+        <div class="col-md-7">
+            
+            <div class="card shadow-sm mb-4 border-primary">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="bi bi-info-circle me-2"></i>Data Permohonan
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Kode</div>
+                        <div class="col-8 fw-bold">{{ item.kode_permohonan }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Pelanggan</div>
+                        <div class="col-8">{{ item.pelanggan.nama }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Layanan</div>
+                        <div class="col-8">{{ item.layanan.nama_layanan }}</div>
+                    </div>
+                    <div class="row mb-0">
+                        <div class="col-4 text-muted">Catatan</div>
+                        <div class="col-8 fst-italic">{{ item.catatan_pelanggan|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mt-4 mb-3 text-secondary">📂 Dokumen Diupload:</h5>
+            <div class="row g-3">
+                {% for dok in dokumen_list %}
+                <div class="col-md-12">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark">{{ dok.master_dokumen.nama_dokumen }}</span>
+                            
+                            {% if dok.path_file %}
+                                <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i> Buka Asli
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body p-0 text-center bg-dark d-flex align-items-center justify-content-center" style="height: 400px; overflow: hidden;">
+                            
+                            {% if dok.path_file %}
+                                
+                                {% if dok.is_pdf %}
+                                    <iframe src="{{ dok.path_file.url }}" width="100%" height="100%" style="border: none;">
+                                        Browser Anda tidak mendukung preview PDF.
+                                    </iframe>
+                                {% else %}
+                                    <img src="{{ dok.path_file.url }}" alt="Preview" 
+                                         class="img-fluid" 
+                                         style="max-height: 100%; width: auto;">
+                                {% endif %}
+
+                            {% else %}
+                                <div class="text-white opacity-50">
+                                    <i class="bi bi-exclamation-circle display-4"></i><br>
+                                    File tidak ditemukan
+                                </div>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        Pelanggan belum mengupload dokumen apa pun.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow border-0 bg-white sticky-top" style="top: 100px; z-index: 100;">
+                <div class="card-header bg-success text-white fw-bold py-3">
+                    <i class="bi bi-check-circle me-2"></i>Keputusan Verifikasi
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Biaya Jasa Admin</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">Rp</span>
+                                <input type="text" class="form-control bg-white fw-bold" value="{{ item.layanan.harga_jasa|rupiah }}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">Input Biaya Resmi (Pajak/PNBP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" name="biaya_resmi" class="form-control form-control-lg border-success" placeholder="0" required>
+                            </div>
+                            <div class="form-text">Lihat nominal di dokumen Notice Pajak.</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                            <div class="alert alert-warning border-warning mb-3">
+                                <div class="d-flex">
+                                    <i class="bi bi-truck fs-4 me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Butuh Pengiriman</h6>
+                                        <p class="mb-0 small text-muted">{{ item.pelanggan.alamat_lengkap|default:"Alamat tidak ditemukan!" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-success">Input Biaya Ongkir</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" name="biaya_pengiriman" class="form-control border-success" placeholder="Cek tarif kurir..." required>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary d-flex align-items-center mb-4">
+                                <i class="bi bi-building fs-4 me-3"></i>
+                                <div>
+                                    <strong>Ambil di Kantor</strong><br>
+                                    <small>Tidak ada biaya kirim.</small>
+                                </div>
+                            </div>
+                            <input type="hidden" name="biaya_pengiriman" value="0">
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg py-3 shadow-sm">
+                                ✔ Verifikasi & Terbitkan Tagihan
+                            </button>
+                            <a href="{% url 'tolak_permohonan' item.id %}" class="btn btn-outline-danger">
+                                ✖ Tolak Permohonan
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -58,7 +58,7 @@ def get_role_redirect_url(user):
 def landing_page(request):
     from ..models import Layanan
     semua_layanan = Layanan.objects.all()
-    return render(request, 'core/home.html', {'layanan_list': semua_layanan})
+    return render(request, 'core/auth/home.html', {'layanan_list': semua_layanan})
 
 def login_view(request):
     # Jika sudah login, lempar ke dashboard yang sesuai
@@ -84,7 +84,7 @@ def login_view(request):
         'firebase_app_id': settings.FIREBASE_APP_ID,
         'firebase_measurement_id': settings.FIREBASE_MEASUREMENT_ID,
     }
-    return render(request, 'core/login_firebase.html', context)
+    return render(request, 'core/auth/login_firebase.html', context)
 
 @csrf_exempt
 def firebase_auth_api(request):

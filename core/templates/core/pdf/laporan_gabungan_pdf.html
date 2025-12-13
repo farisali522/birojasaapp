@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Gabungan - {{ periode }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2F4F4F;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #2F4F4F;
+            font-size: 18pt;
+        }
+
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            background-color: #2F4F4F;
+            color: white;
+            padding: 8px 10px;
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        table th {
+            background-color: #f0f0f0;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        table td {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .summary-box {
+            background-color: #f9f9f9;
+            border: 2px solid #2F4F4F;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: inline-block;
+            width: 48%;
+            margin-bottom: 10px;
+        }
+
+        .summary-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .summary-value {
+            font-size: 14pt;
+            color: #2F4F4F;
+            font-weight: bold;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .badge {
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+        }
+
+        .badge-warning {
+            background-color: #ffc107;
+        }
+
+        .badge-danger {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>LAPORAN OPERASIONAL & KEUANGAN</h1>
+        <p><strong>Periode:</strong> {{ periode }}</p>
+        <p>{{ start_date|date:"d/m/Y" }} s.d. {{ end_date|date:"d/m/Y" }}</p>
+        <p><small>Dicetak pada: {{ generated_at|date:"d F Y, H:i" }} WIB oleh {{ karyawan.nama }}</small></p>
+    </div>
+
+    <!-- Summary Box -->
+    <div class="summary-box">
+        <div class="summary-item">
+            <div class="summary-label">Total Permohonan:</div>
+            <div class="summary-value">{{ total_permohonan }}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Total Pemasukan:</div>
+            <div class="summary-value">Rp {{ total_pemasukan|floatformat:0 }}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Permohonan Selesai:</div>
+            <div class="summary-value" style="color: #28a745;">{{ permohonan_selesai }}</div>
+        </div>
+        <div class="summary-item">
+            <div class="summary-label">Total Transaksi Lunas:</div>
+            <div class="summary-value" style="color: #28a745;">{{ total_transaksi }}</div>
+        </div>
+    </div>
+
+    <!-- LAPORAN OPERASIONAL -->
+    <div class="section">
+        <div class="section-title">📊 LAPORAN OPERASIONAL</div>
+
+        <h4 style="margin-top: 15px;">Statistik Status Permohonan</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th class="text-right">Jumlah</th>
+                    <th class="text-right">Persentase</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Selesai</td>
+                    <td class="text-right"><span class="badge">{{ permohonan_selesai }}</span></td>
+                    <td class="text-right">{% if total_permohonan > 0 %}{{ permohonan_selesai|floatformat:0 }}%{% else
+                        %}0%{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Diproses</td>
+                    <td class="text-right"><span class="badge badge-warning">{{ permohonan_diproses }}</span></td>
+                    <td class="text-right">{% if total_permohonan > 0 %}{% widthratio permohonan_diproses
+                        total_permohonan 100 %}%{% else %}0%{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Ditolak</td>
+                    <td class="text-right"><span class="badge badge-danger">{{ permohonan_ditolak }}</span></td>
+                    <td class="text-right">{% if total_permohonan > 0 %}{% widthratio permohonan_ditolak
+                        total_permohonan 100 %}%{% else %}0%{% endif %}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Top Layanan yang Digunakan</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Layanan</th>
+                    <th class="text-right">Jumlah Permohonan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in layanan_stats %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td>{{ stat.layanan__nama_layanan }}</td>
+                    <td class="text-right">{{ stat.jumlah }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center" style="color: #999;">Tidak ada data layanan</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Daftar Permohonan (Top 20)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Tanggal</th>
+                    <th>Pelanggan</th>
+                    <th>Layanan</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in permohonan_list %}
+                <tr>
+                    <td>{{ p.kode_permohonan }}</td>
+                    <td>{{ p.created_at|date:"d/m/Y" }}</td>
+                    <td>{{ p.pelanggan.nama }}</td>
+                    <td>{{ p.layanan.nama_layanan }}</td>
+                    <td><small>{{ p.status_proses }}</small></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center" style="color: #999;">Tidak ada permohonan pada periode ini</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- LAPORAN KEUANGAN -->
+    <div class="section" style="page-break-before: always;">
+        <div class="section-title">💰 LAPORAN KEUANGAN</div>
+
+        <h4 style="margin-top: 15px;">Ringkasan Pembayaran per Metode</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metode Pembayaran</th>
+                    <th class="text-right">Jumlah Transaksi</th>
+                    <th class="text-right">Total (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in metode_stats %}
+                <tr>
+                    <td>{{ stat.metode_pembayaran|default:"Belum Diset" }}</td>
+                    <td class="text-right">{{ stat.jumlah }}</td>
+                    <td class="text-right"><strong>Rp {{ stat.total|floatformat:0 }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center" style="color: #999;">Tidak ada transaksi pada periode ini</td>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #f0f0f0; font-weight: bold;">
+                    <td colspan="2" class="text-right">TOTAL PEMASUKAN:</td>
+                    <td class="text-right" style="color: #28a745;">Rp {{ total_pemasukan|floatformat:0 }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Daftar Pembayaran Lunas (Top 20)</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>No. Invoice</th>
+                    <th>Tanggal Lunas</th>
+                    <th>Pelanggan</th>
+                    <th>Metode</th>
+                    <th class="text-right">Total (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bayar in pembayaran_list %}
+                <tr>
+                    <td>{{ bayar.nomor_invoice }}</td>
+                    <td>{{ bayar.updated_at|date:"d/m/Y" }}</td>
+                    <td>{{ bayar.permohonan.pelanggan.nama }}</td>
+                    <td><small>{{ bayar.metode_pembayaran }}</small></td>
+                    <td class="text-right">{{ bayar.total_biaya|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center" style="color: #999;">Tidak ada pembayaran lunas pada periode ini
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Dokumen ini digenerate otomatis oleh Sistem BiroJasa | Confidential & Internal Use Only</p>
+    </div>
+</body>
+
+</html>

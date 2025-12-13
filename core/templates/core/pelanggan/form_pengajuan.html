@@ -1,0 +1,80 @@
+{% extends 'core/shared/base.html' %}
+{% load rupiah_filters %}
+{% block title %}Formulir Pengajuan{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill">Langkah 2 dari 2</span>
+                <h2 class="fw-bold" style="color: var(--primary-green);">Lengkapi Berkas</h2>
+                <p class="text-muted">Anda memilih layanan <strong>{{ layanan.nama_layanan }}</strong></p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5">
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color: var(--text-dark);">
+                            1. Upload Dokumen Persyaratan
+                        </h5>
+                        
+                        {% for syarat in syarat_dokumen %}
+                        <div class="mb-4">
+                            <label class="form-label d-flex justify-content-between">
+                                <span>
+                                    {{ forloop.counter }}. {{ syarat.master_dokumen.nama_dokumen }}
+                                    {% if syarat.is_wajib %}<span class="text-danger">*</span>{% endif %}
+                                </span>
+                                <span class="badge bg-light text-secondary border">Wajib Upload</span>
+                            </label>
+                            
+                            <div class="input-group">
+                                <input type="file" name="file_{{ syarat.master_dokumen.id }}" class="form-control" 
+                                       {% if syarat.is_wajib %}required{% endif %}>
+                            </div>
+                            <div class="form-text text-muted ms-1 mt-1">
+                                <small>{{ syarat.master_dokumen.deskripsi }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <h5 class="fw-bold mb-4 pb-2 border-bottom mt-5" style="color: var(--text-dark);">
+                            2. Opsi Pengiriman
+                        </h5>
+
+                        <div class="form-floating mb-3">
+                            <select name="metode_pengiriman" class="form-select" id="metodeSelect" required>
+                                <option value="" selected disabled>Pilih opsi...</option>
+                                <option value="Ambil di Kantor">🏢 Saya akan ambil sendiri di kantor</option>
+                                <option value="Kirim Kurir">🚚 Kirim ke alamat saya (via Kurir)</option>
+                            </select>
+                            <label for="metodeSelect">Bagaimana dokumen diambil?</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea name="catatan" class="form-control" placeholder="Tulis catatan" id="catatanText" style="height: 100px"></textarea>
+                            <label for="catatanText">Catatan Tambahan (Opsional)</label>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary-custom btn-lg py-3 shadow-sm">
+                                Kirim Permohonan 🚀
+                            </button>
+                            <a href="{% url 'pilih_layanan' %}" class="btn btn-link text-muted text-decoration-none">
+                                Batal, pilih layanan lain
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

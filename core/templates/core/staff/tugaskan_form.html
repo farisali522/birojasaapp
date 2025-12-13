@@ -1,0 +1,38 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Tugaskan Staff{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white">
+                    Pilih Petugas Lapangan
+                </div>
+                <div class="card-body p-4">
+                    <h5 class="mb-3">Permohonan: {{ item.kode_permohonan }}</h5>
+                    <p>Layanan: <strong>{{ item.layanan.nama_layanan }}</strong></p>
+                    <hr>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label">Pilih Karyawan (Role: Lapangan)</label>
+                            <select name="karyawan_id" class="form-select" required>
+                                <option value="">-- Pilih Petugas --</option>
+                                {% for staff in staff_list %}
+                                    <option value="{{ staff.id }}">{{ staff.nama }} ({{ staff.no_whatsapp }})</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Pastikan petugas sedang tersedia.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Konfirmasi Penugasan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

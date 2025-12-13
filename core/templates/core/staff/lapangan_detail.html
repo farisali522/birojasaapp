@@ -1,0 +1,58 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Detail Tugas{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">📁 Detail Tugas</h5>
+        <a href="{% url 'lapangan_dashboard' %}" class="btn btn-sm btn-outline-secondary">Kembali</a>
+    </div>
+
+    <div class="card shadow-sm border-primary mb-4">
+        <div class="card-header bg-primary text-white">
+            {{ item.kode_permohonan }}
+        </div>
+        <div class="card-body">
+            <p class="mb-1"><strong>Layanan:</strong><br> {{ item.layanan.nama_layanan }}</p>
+            <hr>
+            <p class="mb-1"><strong>Nama Pelanggan:</strong><br> {{ item.pelanggan.nama }}</p>
+            <p class="mb-1"><strong>Kontak (WA):</strong><br> {{ item.pelanggan.no_whatsapp }} 
+                <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank" class="text-success ms-2"><i class="bi bi-whatsapp"></i> Chat</a>
+            </p>
+            <p class="mb-0"><strong>Alamat:</strong><br> {{ item.pelanggan.alamat_lengkap|default:"-" }}</p>
+        </div>
+        <div class="card-footer bg-white">
+             <a href="{% url 'update_status_lapangan' item.id %}" class="btn btn-primary w-100 fw-bold">
+                🚀 Update Status
+            </a>
+        </div>
+    </div>
+
+    <h6 class="fw-bold text-muted mb-3">Dokumen Pelanggan:</h6>
+    <div class="row g-3">
+        {% for dok in dokumen_list %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light small fw-bold">
+                    {{ dok.master_dokumen.nama_dokumen }}
+                </div>
+                <div class="card-body p-0 text-center bg-dark">
+                    {% if dok.path_file %}
+                        {% if dok.is_pdf %}
+                            <div style="height: 300px;">
+                                <iframe src="{{ dok.path_file.url }}" width="100%" height="100%" style="border:none;"></iframe>
+                            </div>
+                            <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-light w-100 rounded-0">Buka PDF Penuh</a>
+                        {% else %}
+                            <img src="{{ dok.path_file.url }}" class="img-fluid" style="max-height: 400px;">
+                            <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-light w-100 rounded-0">Lihat Gambar Penuh</a>
+                        {% endif %}
+                    {% else %}
+                        <div class="p-3 text-white">File tidak ada</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
