@@ -7,9 +7,14 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Sum, Count
+from django.utils import timezone
+from datetime import timedelta
 
 # Import Models
 from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, MasterDokumen, LayananDokumen
+
+# Import Helpers
+from ..utils import render_to_pdf
 
 # ==========================================
 # HELPER DECORATOR
@@ -17,8 +22,8 @@ from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, Maste
 
 def manajer_check(user):
     try:
-        return Karyawan.objects.get(email=user.email).role == 'manajer'
-    except Karyawan.DoesNotExist:
+        return Karyawan.objects.filter(email=user.email, role='manajer').exists()
+    except:
         return False
 
 # ==========================================
@@ -84,40 +89,171 @@ def laporan_keuangan_view(request):
 
     return render(request, 'core/laporan.html', {'laporan': laporan, 'total_pemasukan': total_pemasukan, 'start_date': start_date, 'end_date': end_date})
 
+# 🔥 NEW: LAPORAN GABUNGAN (Operasional + Keuangan)
+@login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
+def cetak_laporan_gabungan_view(request):
+    """
+    Cetak Laporan Operasional & Keuangan Gabungan
+    Filter: Harian, Mingguan, Bulanan, Tahunan
+    """
+    karyawan = Karyawan.objects.get(email=request.user.email)
+    
+    # Default: Bulan ini
+    today = timezone.now().date()
+    start_date = today.replace(day=1)
+    end_date = today
+    
+    # Ambil parameter filter
+    periode = request.GET.get('periode', 'bulanan')
+    custom_start = request.GET.get('start_date')
+    custom_end = request.GET.get('end_date')
+    
+    # Hitung tanggal berdasarkan periode
+    if periode == 'harian':
+        start_date = today
+        end_date = today
+        label_periode = today.strftime('%d %B %Y')
+    elif periode == 'mingguan':
+        start_date = today - timedelta(days=today.weekday())  # Senin minggu ini
+        end_date = start_date + timedelta(days=6)  # Minggu
+        label_periode = f"{start_date.strftime('%d %b')} - {end_date.strftime('%d %b %Y')}"
+    elif periode == 'bulanan':
+        start_date = today.replace(day=1)
+        # Last day of month
+        if today.month == 12:
+            end_date = today.replace(day=31)
+        else:
+            end_date = (today.replace(month=today.month+1, day=1) - timedelta(days=1))
+        label_periode = today.strftime('%B %Y')
+    elif periode == 'tahunan':
+        start_date = today.replace(month=1, day=1)
+        end_date = today.replace(month=12, day=31)
+        label_periode = f'Tahun {today.year}'
+    elif periode == 'custom' and custom_start and custom_end:
+        start_date = datetime.datetime.strptime(custom_start, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(custom_end, '%Y-%m-%d').date()
+        label_periode = f"{start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}"
+    
+    # === LAPORAN OPERASIONAL ===
+    permohonan_list = Permohonan.objects.filter(
+        created_at__date__range=[start_date, end_date]
+    ).order_by('-created_at')
+    
+    # Statistik operasional
+    total_permohonan = permohonan_list.count()
+    permohonan_selesai = permohonan_list.filter(status_proses='Selesai').count()
+    permohonan_diproses = permohonan_list.exclude(status_proses__in=['Selesai', 'Ditolak']).count()
+    permohonan_ditolak = permohonan_list.filter(status_proses='Ditolak').count()
+    
+    # Breakdown per layanan
+    layanan_stats = permohonan_list.values('layanan__nama_layanan').annotate(
+        jumlah=Count('id')
+    ).order_by('-jumlah')
+    
+    # === LAPORAN KEUANGAN ===
+    pembayaran_list = Pembayaran.objects.filter(
+        status_pembayaran='paid',
+        updated_at__date__range=[start_date, end_date]
+    ).order_by('-updated_at')
+    
+    # Statistik keuangan
+    total_transaksi = pembayaran_list.count()
+    total_pemasukan = pembayaran_list.aggregate(Sum('total_biaya'))['total_biaya__sum'] or 0
+    
+    # Breakdown per metode pembayaran
+    metode_stats = pembayaran_list.values('metode_pembayaran').annotate(
+        jumlah=Count('id'),
+        total=Sum('total_biaya')
+    ).order_by('-total')
+    
+    # Jika request adalah cetak PDF
+    if 'print' in request.GET:
+        context = {
+            'karyawan': karyawan,
+            'periode': label_periode,
+            'start_date': start_date,
+            'end_date': end_date,
+            'generated_at': timezone.now(),
+            
+            # Operasional
+            'total_permohonan': total_permohonan,
+            'permohonan_selesai': permohonan_selesai,
+            'permohonan_diproses': permohonan_diproses,
+            'permohonan_ditolak': permohonan_ditolak,
+            'layanan_stats': layanan_stats,
+            'permohonan_list': permohonan_list[:20],  # Top 20
+            
+            # Keuangan
+            'total_transaksi': total_transaksi,
+            'total_pemasukan': total_pemasukan,
+            'metode_stats': metode_stats,
+            'pembayaran_list': pembayaran_list[:20],  # Top 20
+        }
+        
+        pdf = render_to_pdf('core/laporan_gabungan_pdf.html', context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="Laporan_{periode}_{today}.pdf"'
+            return response
+        else:
+            messages.error(request, 'Gagal generate PDF')
+            return redirect('cetak_laporan_gabungan')
+    
+    # Tampilkan form filter
+    context = {
+        'karyawan': karyawan,
+        'periode': periode,
+        'label_periode': label_periode,
+        'start_date': start_date,
+        'end_date': end_date,
+        
+        # Operasional
+        'total_permohonan': total_permohonan,
+        'permohonan_selesai': permohonan_selesai,
+        'permohonan_diproses': permohonan_diproses,
+        'permohonan_ditolak': permohonan_ditolak,
+        'layanan_stats': layanan_stats,
+        
+        # Keuangan
+        'total_transaksi': total_transaksi,
+        'total_pemasukan': total_pemasukan,
+        'metode_stats': metode_stats,
+    }
+    return render(request, 'core/cetak_laporan_gabungan.html', context)
+
+
 # ==========================================
 # MANAJER VIEWS - EMPLOYEE MANAGEMENT
 # ==========================================
 
 @login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
 def manajer_karyawan_list_view(request):
-    # Security Check
-    try:
-        if Karyawan.objects.get(email=request.user.email).role != 'manajer':
-            return redirect('dashboard')
-    except:
+    if not Karyawan.objects.filter(email=request.user.email).exists():
         return redirect('dashboard')
-
-    karyawan_list = Karyawan.objects.all().order_by('role', 'nama')
-    return render(request, 'core/manajer_karyawan_list.html', {'karyawan_list': karyawan_list})
+    
+    karyawan_list = Karyawan.objects.all().order_by('nama')
+    context = {
+        'karyawan_list': karyawan_list
+    }
+    return render(request, 'core/manajer_karyawan_list.html', context)
 
 @login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
 def manajer_karyawan_create_view(request):
-    # Security Check (Sama)
-    if not Karyawan.objects.filter(email=request.user.email, role='manajer').exists():
-        return redirect('dashboard')
-
     if request.method == 'POST':
+        nama = request.POST.get('nama')
+        email = request.POST.get('email')
+        no_wa = request.POST.get('no_wa')
+        role = request.POST.get('role')
+        
+        # Generate kode
+        kode = f"KRY-{Karyawan.objects.count() + 1}"
+        
+        # Create User
         try:
-            # Ambil data
-            nama = request.POST.get('nama')
-            email = request.POST.get('email')
-            no_wa = request.POST.get('no_wa')
-            role = request.POST.get('role')
-            
-            # Generate Kode Unik (KRY-UUID)
-            kode = f"KRY-{uuid.uuid4().hex[:6].upper()}"
-            
-            # Simpan ke Database Karyawan
+            user = User.objects.create_user(username=email, email=email, password=uuid.uuid4().hex[:8])
             Karyawan.objects.create(
                 kode_karyawan=kode,
                 nama=nama,
@@ -125,130 +261,106 @@ def manajer_karyawan_create_view(request):
                 no_whatsapp=no_wa,
                 role=role
             )
-            
-            messages.success(request, f"Karyawan {nama} berhasil ditambahkan!")
+            messages.success(request, f"Kar yawan {nama} berhasil ditam bahkan.")
             return redirect('manajer_karyawan_list')
-            
-        except Exception as e:
-            messages.error(request, f"Gagal menambah karyawan: {e}")
-
+        except:
+            messages.error(request, "Email sudah terdaftar.")
+    
     return render(request, 'core/manajer_karyawan_form.html')
 
 @login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
 def manajer_karyawan_edit_view(request, karyawan_id):
-    # Security Check
-    if not Karyawan.objects.filter(email=request.user.email, role='manajer').exists():
-        return redirect('dashboard')
-        
     karyawan = get_object_or_404(Karyawan, id=karyawan_id)
     
     if request.method == 'POST':
-        try:
-            karyawan.nama = request.POST.get('nama')
-            karyawan.email = request.POST.get('email')
-            karyawan.no_whatsapp = request.POST.get('no_wa')
-            karyawan.role = request.POST.get('role')
-            karyawan.save()
-            
-            messages.success(request, "Data karyawan diperbarui.")
-            return redirect('manajer_karyawan_list')
-        except Exception as e:
-            messages.error(request, f"Error: {e}")
-
-    return render(request, 'core/manajer_karyawan_form.html', {'item': karyawan})
+        karyawan.nama = request.POST.get('nama')
+        karyawan.no_whatsapp = request.POST.get('no_wa')
+        karyawan.role = request.POST.get('role')
+        karyawan.save()
+        messages.success(request, "Data karyawan diupdate.")
+        return redirect('manajer_karyawan_list')
+    
+    return render(request, 'core/manajer_karyawan_form.html', {'karyawan': karyawan})
 
 @login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
 def manajer_karyawan_delete_view(request, karyawan_id):
-    if not Karyawan.objects.filter(email=request.user.email, role='manajer').exists():
-        return redirect('dashboard')
-        
     karyawan = get_object_or_404(Karyawan, id=karyawan_id)
-    
-    # Cegah manajer menghapus dirinya sendiri
-    if karyawan.email == request.user.email:
-        messages.error(request, "Anda tidak bisa menghapus akun sendiri!")
-    else:
-        karyawan.delete()
-        # Opsional: Hapus juga User Django jika ada
-        User.objects.filter(email=karyawan.email).delete()
-        messages.success(request, "Karyawan dihapus.")
-        
+    try:
+        user = User.objects.get(email=karyawan.email)
+        user.delete()
+    except:
+        pass
+    karyawan.delete()
+    messages.success(request, "Karyawan dihapus.")
     return redirect('manajer_karyawan_list')
 
 # ==========================================
 # MANAJER VIEWS - SERVICE MASTER DATA
 # ==========================================
 
+@login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_list_view(request):
     layanan_list = Layanan.objects.all().order_by('nama_layanan')
-
-    if request.method == 'POST':
-        layanan_id = request.POST.get('layanan_id')
-        layanan_obj = get_object_or_404(Layanan, id=layanan_id)
-        layanan_obj.delete()
-        messages.success(request, f"Layanan {layanan_obj.nama_layanan} dihapus.")
-        return redirect('master_layanan_list')
-
     return render(request, 'core/master_layanan_list.html', {'layanan_list': layanan_list})
 
+@login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_form_view(request, layanan_id=None):
-    layanan_obj = get_object_or_404(Layanan, id=layanan_id) if layanan_id else None
-
+    layanan = None
+    if layanan_id:
+        layanan = get_object_or_404(Layanan, id=layanan_id)
+    
     if request.method == 'POST':
-        try:
-            # Cek apakah kode sudah ada untuk CREATE
-            if not layanan_obj and Layanan.objects.filter(kode_layanan=request.POST.get('kode_layanan')).exists():
-                messages.error(request, "Kode Layanan sudah digunakan!")
-                return redirect('master_layanan_add')
+        nama = request.POST.get('nama_layanan')
+        harga = request.POST.get('harga_jasa')
+        estimasi = request.POST.get('estimasi_waktu')
+        
+        if layanan:
+            layanan.nama_layanan = nama
+            layanan.harga_jasa = harga
+            layanan.estimasi_waktu = estimasi
+            layanan.save()
+            messages.success(request, "Layanan diupdate.")
+        else:
+            kode = f"LAY-{Layanan.objects.count() + 1}"
+            Layanan.objects.create(kode_layanan=kode, nama_layanan=nama, harga_jasa=harga, estimasi_waktu=estimasi)
+            messages.success(request, "Layanan ditambahkan.")
+        return redirect('master_layanan_list')
+    
+    return render(request, 'core/master_layanan_form.html', {'layanan': layanan})
 
-            # Create atau Update
-            Layanan.objects.update_or_create(
-                id=layanan_id,
-                defaults={
-                    'kode_layanan': request.POST.get('kode_layanan'),
-                    'nama_layanan': request.POST.get('nama_layanan'),
-                    'harga_jasa': request.POST.get('harga_jasa'),
-                    'estimasi_waktu': request.POST.get('estimasi_waktu'),
-                }
-            )
-            messages.success(request, "Data layanan berhasil disimpan.")
-            return redirect('master_layanan_list')
-        except Exception as e:
-            messages.error(request, f"Gagal menyimpan: {e}")
-
-    context = {'item': layanan_obj, 'is_edit': layanan_id is not None}
-    return render(request, 'core/master_layanan_form.html', context)
-
+@login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_requirements_view(request, layanan_id):
     layanan = get_object_or_404(Layanan, id=layanan_id)
-
-    # Ambil semua dokumen yang mungkin (Master Dokumen)
-    master_dokumen = MasterDokumen.objects.all()
-    # Ambil semua persyaratan yang sudah terpasang
-    persyaratan_terpasang = LayananDokumen.objects.filter(layanan=layanan).values_list('master_dokumen__id', flat=True)
-
+    all_dokumen = MasterDokumen.objects.all()
+    current_syarat = LayananDokumen.objects.filter(layanan=layanan)
+    
     if request.method == 'POST':
-        # Hapus semua relasi lama untuk layanan ini
-        LayananDokumen.objects.filter(layanan=layanan).delete()
-
-        # Buat relasi baru berdasarkan centangan form
-        for doc in master_dokumen:
-            if request.POST.get(f'doc_{doc.id}'):
+        # Clear existing
+        current_syarat.delete()
+        
+        # Add new
+        for dok in all_dokumen:
+            if f'dok_{dok.id}' in request.POST:
+                is_wajib = request.POST.get(f'wajib_{dok.id}') == 'on'
                 LayananDokumen.objects.create(
                     layanan=layanan,
-                    master_dokumen=doc,
-                    is_wajib=True # Default wajib
+                    master_dokumen=dok,
+                    is_wajib=is_wajib
                 )
-        messages.success(request, f"Persyaratan untuk {layanan.nama_layanan} berhasil diperbarui.")
+        messages.success(request, "Syarat dokumen diupdate.")
         return redirect('master_layanan_list')
-
+    
+    current_ids = [s.master_dokumen.id for s in current_syarat]
     context = {
         'layanan': layanan,
-        'master_dokumen': master_dokumen,
-        'terpasang_ids': list(persyaratan_terpasang) # IDs yang sudah tercentang
+        'all_dokumen': all_dokumen,
+        'current_syarat': current_syarat,
+        'current_ids': current_ids
     }
     return render(request, 'core/master_layanan_requirements.html', context)
 
@@ -256,39 +368,36 @@ def master_layanan_requirements_view(request, layanan_id):
 # MANAJER VIEWS - DOCUMENT MASTER DATA
 # ==========================================
 
+@login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_dokumen_list_view(request):
-    master_dokumen_list = MasterDokumen.objects.all().order_by('nama_dokumen')
-    
-    if request.method == 'POST':
-        doc_id = request.POST.get('doc_id')
-        doc_obj = get_object_or_404(MasterDokumen, id=doc_id)
-        
-        # Perlu cek apakah dokumen masih dipakai di relasi LayananDokumen atau Dokumen (FK set to RESTRICT)
-        # Untuk simpel, kita asumsikan Manajer tahu risikonya, atau nanti kita tambahkan check.
-        doc_obj.delete() 
-        messages.success(request, f"Master Dokumen {doc_obj.nama_dokumen} dihapus.")
+    if request.method == 'POST' and 'delete_id' in request.POST:
+        doc_id = request.POST.get('delete_id')
+        MasterDokumen.objects.filter(id=doc_id).delete()
+        messages.success(request, "Dokumen dihapus.")
         return redirect('master_dokumen_list')
-        
-    return render(request, 'core/master_dokumen_list.html', {'master_dokumen_list': master_dokumen_list})
+    
+    dokumen_list = MasterDokumen.objects.all().order_by('nama_dokumen')
+    return render(request, 'core/master_dokumen_list.html', {'dokumen_list': dokumen_list})
 
+@login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_dokumen_form_view(request, doc_id=None):
-    doc_obj = get_object_or_404(MasterDokumen, id=doc_id) if doc_id else None
+    dokumen = None
+    if doc_id:
+        dokumen = get_object_or_404(MasterDokumen, id=doc_id)
     
     if request.method == 'POST':
-        try:
-            MasterDokumen.objects.update_or_create(
-                id=doc_id,
-                defaults={
-                    'nama_dokumen': request.POST.get('nama_dokumen'),
-                    'deskripsi': request.POST.get('deskripsi'),
-                }
-            )
-            messages.success(request, "Data Master Dokumen berhasil disimpan.")
-            return redirect('master_dokumen_list')
-        except Exception as e:
-            messages.error(request, f"Gagal menyimpan: {e}")
-
-    context = {'item': doc_obj, 'is_edit': doc_id is not None}
-    return render(request, 'core/master_dokumen_form.html', context)
+        nama = request.POST.get('nama_dokumen')
+        desk = request.POST.get('deskripsi')
+        
+        if dokumen:
+            dokumen.nama_dokumen = nama
+            dokumen.deskripsi = desk
+            dokumen.save()
+        else:
+            MasterDokumen.objects.create(nama_dokumen=nama, deskripsi=desk)
+        messages.success(request, "Data disimpan.")
+        return redirect('master_dokumen_list')
+    
+    return render(request, 'core/master_dokumen_form.html', {'dokumen': dokumen})

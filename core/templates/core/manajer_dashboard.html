@@ -1,32 +1,37 @@
 {% extends 'core/base.html' %}
-{% load rupiah_filters %} 
+{% load rupiah_filters %}
 
 {% block title %}Executive Dashboard{% endblock %}
 {% block content %}
 
 <style>
     .nav-pills .nav-link {
-        color: #2F4F4F !important; /* Dark Green text for inactive */
+        color: #2F4F4F !important;
+        /* Dark Green text for inactive */
         background-color: #fff;
         border: 1px solid #dee2e6;
         padding: 10px 20px;
         font-weight: 600;
-        border-radius: 8px; /* Tambahkan sedikit rounding */
+        border-radius: 8px;
+        /* Tambahkan sedikit rounding */
     }
-    
+
     /* Warna saat Tab Aktif/Diklik */
     .nav-pills .nav-link.active {
-        background-color: #2F4F4F !important; /* Background Hijau */
-        color: #fff !important; /* Teks Putih */
+        background-color: #2F4F4F !important;
+        /* Background Hijau */
+        color: #fff !important;
+        /* Teks Putih */
         border-color: #2F4F4F;
     }
+
     .nav-pills .nav-link:hover:not(.active) {
         background-color: #e9ecef;
         color: #1e3333 !important;
     }
 </style>
 <div class="container py-5">
-    
+
     <div class="row mb-4">
         <div class="col-md-12">
             <h2 class="fw-bold text-dark" style="font-family: 'Montserrat', sans-serif;">Dashboard Manajer</h2>
@@ -40,7 +45,11 @@
                 <div class="card-body text-center">
                     <h6 class="text-muted text-uppercase">Total Pendapatan</h6>
                     <h2 class="fw-bold text-success display-6">{{ total_uang|rupiah }}</h2>
-                    <a href="{% url 'laporan_keuangan' %}" class="btn btn-sm btn-outline-success mt-2">Lihat Laporan Detail ➔</a>
+                    <a href="{% url 'laporan_keuangan' %}" class="btn btn-sm btn-outline-success mt-2">Lihat Laporan
+                        Detail ➔</a>
+                    <a href="{% url 'cetak_laporan_gabungan' %}" class="btn btn-sm btn-danger mt-2">
+                        <i class="bi bi-file-earmark-pdf"></i> Cetak Laporan PDF
+                    </a>
                 </div>
             </div>
         </div>
@@ -63,15 +72,17 @@
             </div>
         </div>
     </div>
-    
+
     <ul class="nav nav-pills mb-4 gap-2" id="manager-pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold" id="pills-status-tab" data-bs-toggle="pill" data-bs-target="#pills-status" type="button">
+            <button class="nav-link active fw-bold" id="pills-status-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-status" type="button">
                 📈 Monitoring Proses
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="pills-master-tab" data-bs-toggle="pill" data-bs-target="#pills-master" type="button">
+            <button class="nav-link fw-bold" id="pills-master-tab" data-bs-toggle="pill" data-bs-target="#pills-master"
+                type="button">
                 ⚙️ Pengaturan Master Data
             </button>
         </li>
@@ -99,7 +110,10 @@
                                 <td class="text-end pe-5 fw-bold">{{ stat.jumlah }}</td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="2" class="text-center text-muted py-3">Belum ada data transaksi untuk dihitung.</td></tr>
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-3">Belum ada data transaksi untuk
+                                    dihitung.</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -112,12 +126,13 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4" style="color: var(--primary-green);">Aksi Pengaturan Cepat:</h5>
                     <div class="row g-4">
-                        
+
                         <div class="col-md-4">
                             <div class="card h-100 shadow-sm border-0 bg-light p-3">
                                 <i class="bi bi-people-fill fs-3" style="color: var(--primary-green);"></i>
                                 <h6 class="fw-bold mt-2 mb-3">Akun Karyawan</h6>
-                                <a href="{% url 'manajer_karyawan_list' %}" class="btn btn-primary-custom btn-sm">Akses CRUD</a>
+                                <a href="{% url 'manajer_karyawan_list' %}" class="btn btn-primary-custom btn-sm">Akses
+                                    CRUD</a>
                             </div>
                         </div>
 
@@ -125,7 +140,8 @@
                             <div class="card h-100 shadow-sm border-0 bg-light p-3">
                                 <i class="bi bi-tags-fill fs-3" style="color: var(--primary-green);"></i>
                                 <h6 class="fw-bold mt-2 mb-3">Layanan & Harga</h6>
-                                <a href="{% url 'master_layanan_list' %}" class="btn btn-primary-custom btn-sm">Akses CRUD</a>
+                                <a href="{% url 'master_layanan_list' %}" class="btn btn-primary-custom btn-sm">Akses
+                                    CRUD</a>
                             </div>
                         </div>
 
@@ -133,7 +149,8 @@
                             <div class="card h-100 shadow-sm border-0 bg-light p-3">
                                 <i class="bi bi-journal-text fs-3" style="color: var(--primary-green);"></i>
                                 <h6 class="fw-bold mt-2 mb-3">Master Dokumen</h6>
-                                <a href="{% url 'master_dokumen_list' %}" class="btn btn-primary-custom btn-sm">Akses CRUD</a>
+                                <a href="{% url 'master_dokumen_list' %}" class="btn btn-primary-custom btn-sm">Akses
+                                    CRUD</a>
                             </div>
                         </div>
 

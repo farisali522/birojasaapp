@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Cetak Laporan Gabungan{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="bi bi-file-earmark-pdf"></i> Cetak Laporan Operasional & Keuangan</h4>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{% url 'cetak_laporan_gabungan' %}" class="mb-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Pilih Periode:</label>
+                        <select name="periode" id="periodeSelect" class="form-select">
+                            <option value="harian">Harian (Hari Ini)</option>
+                            <option value="mingguan">Mingguan (Minggu Ini)</option>
+                            <option value="bulanan">Bulanan (Bulan Ini)</option>
+                            <option value="tahunan">Tahunan (Tahun Ini)</option>
+                            <option value="custom">Custom (Pilih Tanggal)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3" id="customDateStart" style="display: none;">
+                        <label class="form-label">Dari Tanggal:</label>
+                        <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
+                    </div>
+                    <div class="col-md-3" id="customDateEnd" style="display: none;">
+                        <label class="form-label">Sampai Tanggal:</label>
+                        <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
+                    </div>
+                    <div class="col-md-2 align-self-end">
+                        <button type="submit" class="btn btn-info w-100">
+                            <i class="bi bi-search"></i> Preview
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <hr>
+
+            {% if label_periode %}
+            <div class="alert alert-info"><strong>Periode:</strong> {{ label_periode }}</div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5><i class="bi bi-graph-up"></i> Laporan Operasional</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td>Total Permohonan</td>
+                                    <td class="text-end"><strong>{{ total_permohonan }}</strong></td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td>Selesai</td>
+                                    <td class="text-end"><strong>{{ permohonan_selesai }}</strong></td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>Diproses</td>
+                                    <td class="text-end"><strong>{{ permohonan_diproses }}</strong></td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td>Ditolak</td>
+                                    <td class="text-end"><strong>{{ permohonan_ditolak }}</strong></td>
+                                </tr>
+                            </table>
+                            <h6 class="mt-3">Top Layanan:</h6>
+                            <ul class="list-group list-group-flush">
+                                {% for stat in layanan_stats|slice:":5" %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ stat.layanan__nama_layanan }}</span>
+                                    <span class="badge bg-primary">{{ stat.jumlah }}</span>
+                                </li>
+                                {% empty %}
+                                <li class="list-group-item text-muted">Tidak ada data</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="bi bi-cash-stack"></i> Laporan Keuangan</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td>Total Transaksi</td>
+                                    <td class="text-end"><strong>{{ total_transaksi }}</strong></td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td>Total Pemasukan</td>
+                                    <td class="text-end"><strong>Rp {{ total_pemasukan|floatformat:0 }}</strong></td>
+                                </tr>
+                            </table>
+                            <h6 class="mt-3">Metode Pembayaran:</h6>
+                            <ul class="list-group list-group-flush">
+                                {% for stat in metode_stats %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ stat.metode_pembayaran|default:"Belum Diset" }}</span>
+                                    <span>
+                                        <span class="badge bg-secondary">{{ stat.jumlah }}</span>
+                                        <span class="text-success fw-bold">Rp {{ stat.total|floatformat:0 }}</span>
+                                    </span>
+                                </li>
+                                {% empty %}
+                                <li class="list-group-item text-muted">Tidak ada data</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="?periode={{ periode }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&print=true"
+                    class="btn btn-danger btn-lg" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> Cetak PDF Gabungan
+                </a>
+                <a href="{% url 'manajer_dashboard' %}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Kembali
+                </a>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-info-circle"></i> Silakan pilih periode dan klik Preview untuk melihat data laporan.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var periodeValue = '{{ periode|escapejs }}';
+        var periodeSelect = document.getElementById('periodeSelect');
+        if (periodeValue) {
+            periodeSelect.value = periodeValue;
+        }
+        toggleCustomDate();
+
+        periodeSelect.addEventListener('change', toggleCustomDate);
+    });
+
+    function toggleCustomDate() {
+        var periode = document.getElementById('periodeSelect').value;
+        var startDiv = document.getElementById('customDateStart');
+        var endDiv = document.getElementById('customDateEnd');
+        if (periode === 'custom') {
+            startDiv.style.display = 'block';
+            endDiv.style.display = 'block';
+        } else {
+            startDiv.style.display = 'none';
+            endDiv.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

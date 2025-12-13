@@ -49,6 +49,7 @@ from .staff_lapangan_views import (
 from .manajer_views import (
     manajer_dashboard_view,
     laporan_keuangan_view,
+    cetak_laporan_gabungan_view,  # NEW
     manajer_karyawan_list_view,
     manajer_karyawan_create_view,
     manajer_karyawan_edit_view,
@@ -98,6 +99,7 @@ __all__ = [
     # Manajer
     'manajer_dashboard_view',
     'laporan_keuangan_view',
+    'cetak_laporan_gabungan_view',  # NEW
     'manajer_karyawan_list_view',
     'manajer_karyawan_create_view',
     'manajer_karyawan_edit_view',

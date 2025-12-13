@@ -37,6 +37,7 @@ urlpatterns = [
 
     path('manajer/dashboard/', views.manajer_dashboard_view, name='manajer_dashboard'),
     path('manajer/laporan/', views.laporan_keuangan_view, name='laporan_keuangan'),
+    path('manajer/cetak-laporan/', views.cetak_laporan_gabungan_view, name='cetak_laporan_gabungan'),  # NEW
 
     path('staff/tolak/<int:permohonan_id>/', views.tolak_permohonan_view, name='tolak_permohonan'),
     path('detail/<int:permohonan_id>/', views.detail_permohonan_view, name='detail_permohonan'),
