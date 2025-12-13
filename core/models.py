@@ -152,3 +152,115 @@ class Pembayaran(models.Model):
 
     def __str__(self):
         return self.nomor_invoice
+
+# ==========================================
+# 4. ENTITAS AUDIT TRAIL (TRACKING HISTORY)
+# ==========================================
+
+class PermohonanAuditLog(models.Model):
+    """
+    Audit trail untuk tracking semua aksi karyawan terhadap permohonan.
+    Satu permohonan bisa punya banyak log (unlimited history).
+    """
+    
+    ACTION_CHOICES = [
+        ('created', 'Permohonan Dibuat'),
+        ('verified', 'Diverifikasi'),
+        ('rejected', 'Ditolak'),
+        ('assigned', 'Ditugaskan ke Staff Lapangan'),
+        ('in_progress', 'Sedang Diproses'),
+        ('completed', 'Selesai Diproses'),
+        ('delivered', 'Diserahkan ke Pelanggan'),
+    ]
+    
+    permohonan = models.ForeignKey(
+        Permohonan, 
+        on_delete=models.CASCADE, 
+        related_name='audit_logs'
+    )
+    
+    karyawan = models.ForeignKey(
+        Karyawan, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='permohonan_logs'
+    )
+    
+    action = models.CharField(
+        max_length=50, 
+        choices=ACTION_CHOICES,
+        verbose_name='Aksi'
+    )
+    
+    notes = models.TextField(
+        blank=True, 
+        null=True,
+        verbose_name='Catatan'
+    )
+    
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Waktu'
+    )
+    
+    class Meta:
+        ordering = ['-timestamp']  # Terbaru di atas
+        verbose_name = 'Log Audit Permohonan'
+        verbose_name_plural = 'Log Audit Permohonan'
+    
+    def __str__(self):
+        karyawan_name = self.karyawan.nama if self.karyawan else 'System'
+        return f"{self.permohonan.kode_permohonan} - {self.get_action_display()} by {karyawan_name}"
+
+class PembayaranAuditLog(models.Model):
+    """
+    Audit trail untuk tracking semua aksi karyawan terhadap pembayaran.
+    """
+    
+    ACTION_CHOICES = [
+        ('invoice_created', 'Invoice Dibuat'),
+        ('payment_verified', 'Pembayaran Diverifikasi'),
+        ('payment_confirmed', 'Pembayaran Dikonfirmasi Lunas'),
+        ('refund_processed', 'Refund Diproses'),
+    ]
+    
+    pembayaran = models.ForeignKey(
+        Pembayaran, 
+        on_delete=models.CASCADE, 
+        related_name='audit_logs'
+    )
+    
+    karyawan = models.ForeignKey(
+        Karyawan, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='pembayaran_logs'
+    )
+    
+    action = models.CharField(
+        max_length=50, 
+        choices=ACTION_CHOICES,
+        verbose_name='Aksi'
+    )
+    
+    notes = models.TextField(
+        blank=True, 
+        null=True,
+        verbose_name='Catatan'
+    )
+    
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Waktu'
+    )
+    
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Log Audit Pembayaran'
+        verbose_name_plural = 'Log Audit Pembayaran'
+    
+    def __str__(self):
+        karyawan_name = self.karyawan.nama if self.karyawan else 'System'
+        return f"{self.pembayaran.nomor_invoice} - {self.get_action_display()} by {karyawan_name}"
