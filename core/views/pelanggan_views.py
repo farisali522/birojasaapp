@@ -87,6 +87,14 @@ def form_pengajuan_view(request, layanan_id):
                         path_file=file_upload
                     )
             
+            # 🔥 AUDIT LOG: Permohonan dibuat
+            PermohonanAuditLog.objects.create(
+                permohonan=permohonan_baru,
+                karyawan=None,  # Dibuat oleh pelanggan (system)
+                action='created',
+                notes=f'Permohonan dibuat oleh {pelanggan.nama} via {metode_pengiriman}'
+            )
+            
             messages.success(request, 'Permohonan berhasil dikirim!')
             return redirect('dashboard')
         except Exception as e:

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models import Q
 
 # Import Models
-from ..models import Pembayaran, Permohonan, Karyawan
+from ..models import Pembayaran, Permohonan, Karyawan, PembayaranAuditLog
 
 # Import Helpers
 from ..utils import kirim_notifikasi_email, render_to_pdf
@@ -54,6 +54,21 @@ def konfirmasi_lunas_view(request, pembayaran_id):
         pembayaran.metode_pembayaran = metode_dipilih
         pembayaran.status_pembayaran = 'paid'
         pembayaran.save()
+        
+        # 🔥 AUDIT LOG: Payment verification & confirmation
+        staff_keuangan = Karyawan.objects.get(email=request.user.email)
+        PembayaranAuditLog.objects.create(
+            pembayaran=pembayaran,
+            karyawan=staff_keuangan,
+            action='payment_verified',
+            notes=f'Terima {metode_dipilih}. Total: Rp {pembayaran.total_biaya:,}'
+        )
+        PembayaranAuditLog.objects.create(
+            pembayaran=pembayaran,
+            karyawan=staff_keuangan,
+            action='payment_confirmed',
+            notes='Pembayaran dikonfirmasi lunas'
+        )
         
         # 3. Update Status Permohonan
         permohonan = pembayaran.permohonan

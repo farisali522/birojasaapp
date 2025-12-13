@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 
 # Import Models
-from ..models import Layanan, Pelanggan, Permohonan, LayananDokumen, Dokumen, Pembayaran, Karyawan
+from ..models import Layanan, Pelanggan, Permohonan, LayananDokumen, Dokumen, Pembayaran, Karyawan, PermohonanAuditLog, PembayaranAuditLog
 
 # Import Helpers
 from ..utils import kirim_notifikasi_email, render_to_pdf
@@ -144,6 +144,15 @@ def verifikasi_permohonan_view(request, permohonan_id):
         permohonan.status_proses = 'Menunggu Pembayaran'
         permohonan.save()
         
+        # 🔥 AUDIT LOG: Verifikasi
+        staff_admin = Karyawan.objects.get(email=request.user.email)
+        PermohonanAuditLog.objects.create(
+            permohonan=permohonan,
+            karyawan=staff_admin,
+            action='verified',
+            notes=f'Diverifikasi. Biaya resmi: Rp {biaya_resmi:,}'
+        )
+        
         total_tagihan = permohonan.layanan.harga_jasa + biaya_resmi + biaya_pengiriman
         
         pembayaran_baru = Pembayaran.objects.create(
@@ -153,6 +162,14 @@ def verifikasi_permohonan_view(request, permohonan_id):
             total_biaya=total_tagihan,
             metode_pembayaran=None,
             status_pembayaran='pending'
+        )
+        
+        # 🔥 AUDIT LOG: Invoice created
+        PembayaranAuditLog.objects.create(
+            pembayaran=pembayaran_baru,
+            karyawan=staff_admin,
+            action='invoice_created',
+            notes=f'Invoice generated. Total: Rp {total_tagihan:,}'
         )
 
         # 1. Siapkan Data untuk PDF
@@ -221,6 +238,16 @@ def tugaskan_staff_view(request, permohonan_id):
         permohonan.karyawan = petugas
         permohonan.status_proses = 'Proses Lapangan'
         permohonan.save()
+        
+        # 🔥 AUDIT LOG: Assignment
+        staff_admin = Karyawan.objects.get(email=request.user.email)
+        PermohonanAuditLog.objects.create(
+            permohonan=permohonan,
+            karyawan=staff_admin,
+            action='assigned',
+            notes=f'Ditugaskan ke {petugas.nama} ({petugas.role})'
+        )
+        
         messages.success(request, f"Ditugaskan ke {petugas.nama}")
         return redirect('staff_dashboard')
 
@@ -258,6 +285,15 @@ def tolak_permohonan_view(request, permohonan_id):
         permohonan.status_proses = 'Ditolak'
         permohonan.catatan_penolakan = alasan
         permohonan.save()
+        
+        # 🔥 AUDIT LOG: Rejection
+        staff_admin = Karyawan.objects.get(email=request.user.email)
+        PermohonanAuditLog.objects.create(
+            permohonan=permohonan,
+            karyawan=staff_admin,
+            action='rejected',
+            notes=f'Ditolak. Alasan: {alasan}'
+        )
         
         subjek = f"PENTING: Permohonan Ditolak ({permohonan.kode_permohonan})"
         pesan = f"""

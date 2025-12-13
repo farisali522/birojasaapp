@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 # Import Models
-from ..models import Permohonan, Karyawan
+from ..models import Permohonan, Karyawan, PermohonanAuditLog
 
 # Import Helpers
 from ..utils import kirim_notifikasi_email
@@ -31,6 +31,22 @@ def update_status_lapangan_view(request, permohonan_id):
         status_baru = request.POST.get('status_baru')
         permohonan.status_proses = status_baru
         permohonan.save()
+        
+        # 🔥 AUDIT LOG: Status update
+        staff_lapangan = Karyawan.objects.get(email=request.user.email)
+        action_map = {
+            'Proses Lapangan': 'in_progress',
+            'Kembali dari Lapangan': 'completed',
+            'Dikirim ke Pelanggan': 'delivered',
+            'Selesai': 'delivered'
+        }
+        action = action_map.get(status_baru, 'in_progress')
+        PermohonanAuditLog.objects.create(
+            permohonan=permohonan,
+            karyawan=staff_lapangan,
+            action=action,
+            notes=f'Status diupdate menjadi: {status_baru}'
+        )
         
         subjek = f"Update Status: {permohonan.kode_permohonan}"
         pesan = f"""
