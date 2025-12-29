@@ -1,52 +1,139 @@
 {% extends 'core/shared/base.html' %}
-{% load rupiah_filters %} 
+{% load rupiah_filters %}
 
 {% block title %}Laporan Keuangan Eksekutif{% endblock %}
 {% block content %}
-<div class="container py-5">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    /* UI PREMIUM ENHANCEMENTS */
+    .laporan-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+        overflow: hidden;
+    }
+
+    .total-card {
+        background: linear-gradient(135deg, var(--primary-green) 0%, #064e3b 100%);
+        border-radius: 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .total-card::after {
+        content: '\F3E8';
+        /* bi-graph-up */
+        font-family: "bootstrap-icons";
+        position: absolute;
+        right: -20px;
+        bottom: -20px;
+        font-size: 8rem;
+        opacity: 0.1;
+        transform: rotate(-15deg);
+    }
+
+    .form-control-custom {
+        border-radius: 12px;
+        padding: 10px 16px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .table-master thead th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 16px 20px;
+    }
+
+    .table-master tbody td {
+        padding: 16px 20px;
+        color: #1e293b;
+    }
+</style>
+
+<div class="container py-5 laporan-container">
+    <!-- HEADER -->
+    <div class="mb-5 d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="fw-bold" style="color: var(--primary-green);"><i class="bi bi-file-bar-graph me-2"></i>Laporan Keuangan</h2>
-            <p class="text-muted mb-0">Analisis Pemasukan Transaksi Lunas.</p>
+            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill mb-3 fw-bold">FINANCIAL
+                ANALYTICS</span>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1px;">Laporan Keuangan</h1>
+            <p class="text-muted mb-0 fs-5">Analisis mendalam pemasukan dari transaksi yang telah lunas.</p>
         </div>
+        <a href="{% url 'manajer_dashboard' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+            <i class="bi bi-arrow-left me-2"></i> Kembali ke Dashboard
+        </a>
     </div>
 
-    <div class="card card-elegant shadow-sm mb-4">
-        <div class="card-body p-4">
-            <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Dari Tanggal</label>
-                    <input type="date" name="start_date" class="form-control" value="{{ start_date|default:'' }}">
+    <!-- FILTER & TOTAL ROW -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card card-master h-100">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <h5 class="fw-bold text-dark mb-0">Filter Periode Laporan</h5>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Sampai Tanggal</label>
-                    <input type="date" name="end_date" class="form-control" value="{{ end_date|default:'' }}">
-                </div>
-                <div class="col-md-6 d-flex gap-3">
-                    <button type="submit" class="btn btn-primary-custom w-100 fw-bold">
-                        🔍 Terapkan Filter
-                    </button>
-                    <a href="{% url 'laporan_keuangan' %}" class="btn btn-outline-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="row mb-5">
-        <div class="col-md-12">
-            <div class="card shadow-lg border-0" style="background: linear-gradient(135deg, var(--primary-green) 0%, #064e3b 100%); color: white;">
-                <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-uppercase mb-1" style="color: var(--accent-gold);">Total Pemasukan (Bersih)</h6>
-                        <h1 class="fw-bold display-5">{{ total_pemasukan|rupiah }}</h1>
-                        <small class="text-white-50">Data yang ditampilkan dari {{ laporan.count }} transaksi lunas.</small>
+                <div class="card-body px-4 pb-4">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Dari Tanggal</label>
+                            <input type="date" name="start_date" class="form-control form-control-custom"
+                                value="{{ start_date|default:'' }}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Sampai Tanggal</label>
+                            <input type="date" name="end_date" class="form-control form-control-custom"
+                                value="{{ end_date|default:'' }}">
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-primary-custom py-2 fw-bold rounded-pill">
+                                <i class="bi bi-funnel"></i>
+                            </button>
+                        </div>
+                    </form>
+                    {% if start_date %}
+                    <div class="mt-3">
+                        <a href="{% url 'laporan_keuangan' %}" class="text-muted small text-decoration-none">
+                            <i class="bi bi-x-circle me-1"></i> Reset Filter
+                        </a>
                     </div>
-                    <form method="GET" style="display: inline;" class="ms-auto">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card total-card h-100 border-0 shadow-lg">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <h6 class="text-uppercase mb-2"
+                        style="color: var(--accent-gold); letter-spacing: 1px; font-weight: 800; font-size: 0.7rem;">
+                        Total Pendapatan Bersih</h6>
+                    <h2 class="fw-800 mb-2 display-6">{{ total_pemasukan|rupiah }}</h2>
+                    <p class="mb-0 text-white-50 small">Berdasarkan {{ laporan.count }} transaksi lunas</p>
+
+                    <form method="GET" class="mt-4">
                         <input type="hidden" name="start_date" value="{{ start_date|default:'' }}">
                         <input type="hidden" name="end_date" value="{{ end_date|default:'' }}">
-                        <button type="submit" name="export" value="true" class="btn btn-gold py-3 px-4 shadow-lg">
-                            <i class="bi bi-download me-2"></i> Export ke CSV
+                        <button type="submit" name="export" value="true"
+                            class="btn btn-gold btn-sm w-100 rounded-pill py-2 fw-bold">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export ke CSV
                         </button>
                     </form>
                 </div>
@@ -54,37 +141,59 @@
         </div>
     </div>
 
-    <div class="card shadow border-0">
-        <div class="card-header bg-white fw-bold py-3">
-            Rincian Transaksi
+    <!-- TRANSACTION TABLE -->
+    <div class="card card-master">
+        <div class="card-header bg-white py-4 px-4 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0">Rincian Transaksi Lunas</h5>
+            <div class="text-muted small">Update otomatis dari sistem keuangan</div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped mb-0 align-middle">
-                    <thead class="bg-light">
+                <table class="table table-master table-hover mb-0 align-middle">
+                    <thead>
                         <tr>
-                            <th class="ps-4">Invoice</th>
-                            <th>Tanggal Bayar</th>
-                            <th>Pelanggan</th>
-                            <th>Layanan</th>
-                            <th>Metode</th>
-                            <th class="text-end pe-4">Jumlah</th>
+                            <th class="ps-4">No. Invoice</th>
+                            <th>Waktu Pelunasan</th>
+                            <th>Identitas Pelanggan</th>
+                            <th>Layanan Jasa</th>
+                            <th class="text-center">Metode</th>
+                            <th class="text-end pe-4">Nominal</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in laporan %}
                         <tr>
-                            <td class="ps-4 fw-bold">{{ item.nomor_invoice }}</td>
-                            <td>{{ item.updated_at|date:"d M Y, H:i" }}</td>
-                            <td>{{ item.permohonan.pelanggan.nama }}</td>
-                            <td>{{ item.permohonan.layanan.nama_layanan }}</td>
-                            <td><span class="badge bg-secondary">{{ item.metode_pembayaran }}</span></td>
-                            <td class="text-end pe-4 fw-bold text-success">{{ item.total_biaya|rupiah }}</td>
+                            <td class="ps-4">
+                                <span class="badge bg-light text-dark border fw-bold px-3 py-2 rounded-3"
+                                    style="font-family: monospace;">{{ item.nomor_invoice }}</span>
+                            </td>
+                            <td class="small text-muted">
+                                {{ item.updated_at|date:"d M Y" }}<br>
+                                <span class="opacity-50 text-xs">{{ item.updated_at|date:"H:i" }} WIB</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ item.permohonan.pelanggan.nama }}</div>
+                                <div class="text-muted small">UID: {{ item.permohonan.pelanggan.id }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-secondary">{{ item.permohonan.layanan.nama_layanan }}</div>
+                                <div class="text-muted small">Kode: {{ item.permohonan.kode_permohonan }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-bold"
+                                    style="font-size: 0.65rem;">
+                                    {{ item.metode_pembayaran|upper }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4 fw-800 text-dark fs-5">
+                                {{ item.total_biaya|rupiah }}
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
-                                Tidak ada data transaksi lunas pada periode yang dipilih.
+                                <i class="bi bi-search fs-1 d-block mb-3 opacity-25"></i>
+                                Tidak ditemukan data transaksi lunas pada periode ini.
                             </td>
                         </tr>
                         {% endfor %}

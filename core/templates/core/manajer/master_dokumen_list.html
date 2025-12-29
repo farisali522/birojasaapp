@@ -25,16 +25,20 @@
                         <td class="ps-4 fw-bold">{{ item.nama_dokumen }}</td>
                         <td>{{ item.deskripsi|default:"-" }}</td>
                         <td class="text-end pe-4">
-                            <a href="{% url 'master_dokumen_edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a href="{% url 'master_dokumen_edit' item.id %}"
+                                class="btn btn-sm btn-outline-secondary">Edit</a>
                             <form method="POST" style="display: inline;">
                                 {% csrf_token %}
-                                <input type="hidden" name="doc_id" value="{{ item.id }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus master dokumen ini?')">Hapus</button>
+                                <input type="hidden" name="delete_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Hapus master dokumen ini?')">Hapus</button>
                             </form>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="3" class="text-center py-4">Belum ada Master Dokumen yang terdaftar.</td></tr>
+                    <tr>
+                        <td colspan="3" class="text-center py-4">Belum ada Master Dokumen yang terdaftar.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>

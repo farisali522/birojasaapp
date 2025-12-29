@@ -1,52 +1,443 @@
 {% extends 'core/shared/base.html' %}
-{% block title %}Kelola Layanan{% endblock %}
+{% block title %}Master Control Center{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Kelola Data Layanan</h3>
-        <a href="{% url 'master_layanan_add' %}" class="btn btn-primary-custom">
-            + Tambah Layanan Baru
+<style>
+    /* UI PREMIUM ENHANCEMENTS */
+    .master-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* CUSTOM TAB SYSTEM */
+    .custom-tabs-wrapper {
+        background: #fff;
+        padding: 8px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        display: inline-flex;
+        margin-bottom: 2rem;
+    }
+
+    .custom-nav-link {
+        border: none !important;
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        padding: 12px 24px !important;
+        border-radius: 12px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .custom-nav-link i {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .custom-nav-link.active {
+        background-color: var(--primary-green) !important;
+        color: #fff !important;
+        box-shadow: 0 8px 16px rgba(6, 78, 59, 0.15) !important;
+    }
+
+    .custom-nav-link.active i {
+        transform: scale(1.1);
+    }
+
+    .custom-nav-link:hover:not(.active) {
+        background-color: #f8fafc !important;
+        color: var(--primary-green) !important;
+    }
+
+    /* TABLE STYLING */
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .table-master thead th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table-master tbody td {
+        padding: 16px 20px;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    /* MATRIX PREMIUM */
+    .matrix-table-wrapper {
+        border-radius: 0 0 20px 20px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .matrix-table th {
+        font-size: 0.7rem !important;
+        white-space: nowrap;
+    }
+
+    .matrix-btn-plus {
+        height: 32px;
+        width: 100%;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #94a3b8;
+        border: 1px dashed #cbd5e1;
+        transition: all 0.2s;
+    }
+
+    .matrix-btn-plus:hover {
+        background: #e2e8f0;
+        color: var(--primary-green);
+        border-color: var(--primary-green);
+    }
+
+    .matrix-status-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        font-weight: 800;
+        cursor: pointer;
+        transition: filter 0.2s;
+    }
+
+    .matrix-status-badge:hover {
+        filter: brightness(0.9);
+    }
+</style>
+
+<div class="container py-5 master-container">
+    <div class="mb-5 d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill mb-3 fw-bold">ADMIN
+                PANEL</span>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1px;">Master Control Center</h1>
+            <p class="text-muted mb-0 fs-5">Ekosistem terpadu untuk pengelolaan layanan dan dokumentasi.</p>
+        </div>
+        <a href="{% url 'manajer_dashboard' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+            <i class="bi bi-arrow-left me-2"></i> Kembali ke Dashboard
         </a>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="ps-4">Kode</th>
-                        <th>Nama Layanan</th>
-                        <th>Harga Jasa</th>
-                        <th>Persyaratan</th>
-                        <th class="text-end pe-4">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in layanan_list %}
-                    <tr>
-                        <td class="ps-4 small fw-bold">{{ item.kode_layanan }}</td>
-                        <td>{{ item.nama_layanan }}</td>
-                        <td>Rp {{ item.harga_jasa }}</td>
-                        <td>
-                            <a href="{% url 'master_layanan_requirements' item.id %}" class="btn btn-sm btn-outline-info">
-                                Atur Persyaratan
-                            </a>
-                        </td>
-                        <td class="text-end pe-4">
-                            <a href="{% url 'master_layanan_edit' item.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                            <form method="POST" action="{% url 'master_layanan_list' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="layanan_id" value="{{ item.id }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus layanan ini?')">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center py-4">Belum ada layanan yang terdaftar.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- TABS NAVIGATION -->
+    <div class="custom-tabs-wrapper" id="masterTabs" role="tablist">
+        <button class="custom-nav-link active" id="layanan-tab" data-bs-toggle="pill" data-bs-target="#layanan"
+            type="button" role="tab">
+            <i class="bi bi-gear-wide-connected"></i> <span>Data Layanan</span>
+        </button>
+        <button class="custom-nav-link" id="dokumen-tab" data-bs-toggle="pill" data-bs-target="#dokumen" type="button"
+            role="tab">
+            <i class="bi bi-folder2-open"></i> <span>Master Dokumen</span>
+        </button>
+        <button class="custom-nav-link" id="matrix-tab" data-bs-toggle="pill" data-bs-target="#matrix" type="button"
+            role="tab">
+            <i class="bi bi-layers-half"></i> <span>Persyaratan Matrix</span>
+        </button>
+    </div>
+
+    <div class="tab-content" id="masterTabsContent">
+        <!-- TAB 1: DATA LAYANAN -->
+        <div class="tab-pane fade show active" id="layanan" role="tabpanel">
+            <div class="card card-master">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-4 px-4 border-0">
+                    <h4 class="mb-0 fw-bold text-dark">Daftar Layanan</h4>
+                    <a href="{% url 'master_layanan_add' %}" class="btn btn-primary-custom px-4 rounded-pill shadow-sm">
+                        <i class="bi bi-plus-lg me-2"></i> Tambah Layanan
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-master table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Kode</th>
+                                <th>Nama Layanan</th>
+                                <th>Harga Jasa</th>
+                                <th class="text-center">Syarat</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in layanan_list %}
+                            <tr>
+                                <td class="ps-4 small fw-bold text-muted">{{ item.kode_layanan }}</td>
+                                <td class="fw-bold text-dark">{{ item.nama_layanan }}</td>
+                                <td class="fw-bold text-success">Rp {{ item.harga_jasa }}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-light rounded-circle shadow-sm"
+                                        onclick="switchTab('matrix-tab')" title="Kelola Syarat di Matriks"
+                                        style="width: 32px; height: 32px; padding: 0;">
+                                        <i class="bi bi-grid-3x3-gap"></i>
+                                    </button>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{% url 'master_layanan_edit' item.id %}"
+                                        class="btn btn-sm btn-outline-secondary border-0" title="Edit Layanan">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_layanan">
+                                        <input type="hidden" name="layanan_id" value="{{ item.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                            title="Hapus Layanan" onclick="return confirm('Hapus layanan ini?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                    Belum ada layanan yang terdaftar.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MASTER DOKUMEN -->
+        <div class="tab-pane fade" id="dokumen" role="tabpanel">
+            <div class="card card-master">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-4 px-4 border-0">
+                    <h4 class="mb-0 fw-bold text-dark">Repository Dokumen</h4>
+                    <a href="{% url 'master_dokumen_add' %}" class="btn btn-primary-custom px-4 rounded-pill shadow-sm">
+                        <i class="bi bi-plus-lg me-2"></i> Tambah Jenis Dokumen
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-master table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Nama Dokumen</th>
+                                <th>Deskripsi</th>
+                                <th class="text-end pe-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in master_dokumen_list %}
+                            <tr>
+                                <td class="ps-4 fw-bold">{{ item.nama_dokumen }}</td>
+                                <td class="text-muted small">{{ item.deskripsi|default:"-" }}</td>
+                                <td class="text-end pe-4">
+                                    <a href="{% url 'master_dokumen_edit' item.id %}"
+                                        class="btn btn-sm btn-outline-secondary border-0" title="Edit Dokumen">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_dokumen">
+                                        <input type="hidden" name="delete_id" value="{{ item.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                            title="Hapus Dokumen" onclick="return confirm('Hapus master dokumen ini?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    <i class="bi bi-file-earmark-x fs-1 d-block mb-3 opacity-25"></i>
+                                    Belum ada jenis dokumen.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: MATRIX PEMETAAN SYARAT -->
+        <div class="tab-pane fade" id="matrix" role="tabpanel">
+            <div class="card card-master overflow-hidden">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <h4 class="mb-1 fw-bold text-dark">Matriks Persyaratan</h4>
+                    <p class="small text-muted mb-0">Klik pada sel untuk menghubungkan layanan dengan dokumen
+                        persyaratan.</p>
+                </div>
+                <div class="card-body p-0 matrix-table-wrapper" style="max-height: 70vh; overflow: auto;">
+                    <style>
+                        .matrix-table th,
+                        .matrix-table td {
+                            border: 1px solid #f0f0f0;
+                            text-align: center;
+                            padding: 12px 8px;
+                        }
+
+                        .matrix-table th:first-child,
+                        .matrix-table td:first-child {
+                            position: sticky;
+                            left: 0;
+                            background: #fff;
+                            z-index: 5;
+                            text-align: left;
+                            min-width: 250px;
+                            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+                        }
+
+                        .matrix-table thead th {
+                            position: sticky;
+                            top: 0;
+                            background: #f8f9fa;
+                            z-index: 6;
+                            border-bottom: 2px solid #dee2e6;
+                        }
+
+                        .matrix-status-btn {
+                            border: none;
+                            background: none;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            font-size: 0.7rem;
+                            font-weight: 800;
+                            transition: transform 0.1s;
+                        }
+
+                        .matrix-status-btn:hover {
+                            transform: scale(1.1);
+                        }
+
+                        .status-wajib {
+                            background-color: #fee2e2;
+                            color: #991b1b;
+                        }
+
+                        .status-opsional {
+                            background-color: #dcfce7;
+                            color: #166534;
+                        }
+
+                        .btn-add-syarat {
+                            color: #dee2e6;
+                            transition: all 0.2s;
+                        }
+
+                        .btn-add-syarat:hover {
+                            color: #0d6efd;
+                            background: #f8f9fa;
+                        }
+                    </style>
+                    <table class="table table-sm matrix-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Layanan \ Dokumen</th>
+                                {% for dok in master_dokumen_list %}
+                                <th class="small font-monospace">{{ dok.nama_dokumen }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in matrix_rows %}
+                            <tr>
+                                <td class="fw-bold bg-light ps-3 small text-truncate"
+                                    title="{{ row.layanan.nama_layanan }}">
+                                    {{ row.layanan.nama_layanan }}
+                                </td>
+                                {% for cell in row.cells %}
+                                <td>
+                                    <div class="matrix-cell">
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="layanan_id" value="{{ row.layanan.id }}">
+                                            <input type="hidden" name="dokumen_id" value="{{ cell.dokumen_id }}">
+
+                                            {% if cell.syarat %}
+                                            <div class="d-grid gap-1">
+                                                <input type="hidden" name="action" value="toggle_syarat">
+                                                <button type="submit"
+                                                    class="btn btn-sm btn-success py-1 border-0 shadow-sm"
+                                                    title="Hapus Syarat">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                </button>
+                                                <button type="submit" name="action" value="toggle_wajib"
+                                                    class="matrix-status-badge {% if cell.syarat.is_wajib %}status-wajib{% else %}status-opsional{% endif %} border-0">
+                                                    {% if cell.syarat.is_wajib %}WAJIB{% else %}OPS{% endif %}
+                                                </button>
+                                            </div>
+                                            {% else %}
+                                            <input type="hidden" name="action" value="toggle_syarat">
+                                            <button type="submit" class="matrix-btn-plus py-1" title="Tambah Syarat">
+                                                <i class="bi bi-plus-lg"></i>
+                                            </button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    function switchTab(tabId) {
+        var tabTriggerEl = document.querySelector('#' + tabId);
+        if (tabTriggerEl) {
+            var tab = new bootstrap.Tab(tabTriggerEl);
+            tab.show();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Cek URL Hash (e.g. #matrix)
+        var hash = window.location.hash;
+        if (hash) {
+            var targetTab = document.querySelector('button[data-bs-target="' + hash + '"]');
+            if (targetTab) {
+                new bootstrap.Tab(targetTab).show();
+            }
+        } else {
+            // 2. Jika tidak ada hash, cek LocalStorage
+            var lastTabId = localStorage.getItem('lastMasterTab');
+            if (lastTabId) {
+                var lastTab = document.querySelector('#' + lastTabId);
+                if (lastTab) {
+                    new bootstrap.Tab(lastTab).show();
+                }
+            }
+        }
+
+        // 3. Simpan tab saat ini ke LocalStorage
+        var tabTriggerList = [].slice.call(document.querySelectorAll('button[data-bs-toggle="pill"]'))
+        tabTriggerList.forEach(function (tabEl) {
+            tabEl.addEventListener('shown.bs.tab', function (event) {
+                localStorage.setItem('lastMasterTab', event.target.id);
+            });
+        });
+    });
+</script>
 {% endblock %}

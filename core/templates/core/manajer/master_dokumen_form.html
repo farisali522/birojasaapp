@@ -1,28 +1,117 @@
 {% extends 'core/shared/base.html' %}
 {% block title %}Form Master Dokumen{% endblock %}
 {% block content %}
-<div class="container py-5">
+<style>
+    .form-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(47, 79, 79, 0.1);
+    }
+
+    .input-group-text {
+        border-radius: 12px 0 0 12px;
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .input-group .form-control,
+    .input-group textarea {
+        border-radius: 0 12px 12px 0;
+    }
+</style>
+
+<div class="container py-5 form-container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-dark text-white fw-bold">
-                    {% if is_edit %}Edit Dokumen: {{ item.nama_dokumen }}{% else %}Tambah Dokumen Baru{% endif %}
+        <div class="col-lg-6">
+            <!-- BACK BUTTON -->
+            <div class="mb-4">
+                <a href="{% url 'master_layanan_list' %}" class="text-decoration-none text-muted fw-bold small">
+                    <i class="bi bi-arrow-left me-1"></i> KEMBALI KE MASTER KONTROL
+                </a>
+            </div>
+
+            <div class="card card-master">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-custom text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                            style="width: 48px; height: 48px;">
+                            <i class="bi bi-file-earmark-text fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-800 mb-0" style="font-family: 'Montserrat'; letter-spacing: -0.5px;">
+                                {% if is_edit %}Edit Master Dokumen{% else %}Tambah Dokumen Baru{% endif %}
+                            </h4>
+                            <p class="text-muted small mb-0">Definisikan dokumen persyaratan aplikasi.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-4 pt-0">
+                    <hr class="opacity-10 mb-4">
                     <form method="POST">
                         {% csrf_token %}
+
                         <div class="mb-3">
-                            <label class="form-label">Nama Dokumen (Contoh: KTP Asli)</label>
-                            <input type="text" name="nama_dokumen" class="form-control" value="{{ item.nama_dokumen }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label">Deskripsi / Keterangan</label>
-                            <textarea name="deskripsi" class="form-control" rows="3">{{ item.deskripsi }}</textarea>
+                            <label class="form-label">Nama Dokumen</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                <input type="text" name="nama_dokumen" class="form-control"
+                                    value="{{ item.nama_dokumen }}" placeholder="Contoh: KTP Asli / Fotokopi" required>
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary-custom">Simpan Data</button>
-                            <a href="{% url 'master_dokumen_list' %}" class="btn btn-outline-secondary">Batal</a>
+                        <div class="mb-4">
+                            <label class="form-label">Deskripsi / Keterangan</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-info-circle"></i></span>
+                                <textarea name="deskripsi" class="form-control" rows="3"
+                                    placeholder="Informasi tambahan mengenai dokumen ini...">{{ item.deskripsi }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary-custom py-3 rounded-pill fw-bold shadow-sm">
+                                <i class="bi bi-check-circle me-2"></i> {% if is_edit %}Simpan Perubahan{% else
+                                %}Daftarkan Dokumen{% endif %}
+                            </button>
                         </div>
                     </form>
                 </div>

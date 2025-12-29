@@ -1,50 +1,142 @@
 {% extends 'core/shared/base.html' %}
 {% block title %}Tugas Lapangan{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0">Halo, {{ karyawan.nama }} 👋</h4>
-        <span class="badge bg-dark">Petugas Lapangan</span>
+<style>
+    .field-dashboard {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.3s ease;
+    }
+
+    .card-master:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .task-title {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--primary-green);
+    }
+
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+    }
+
+    .wa-link {
+        color: #25d366;
+        transition: all 0.2s;
+    }
+
+    .wa-link:hover {
+        color: #128c7e;
+    }
+</style>
+
+<div class="container py-5 field-dashboard">
+    <!-- HEADER SECTION -->
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <span class="badge bg-primary-custom text-white px-3 py-2 rounded-pill mb-3 fw-bold"
+                style="font-size: 0.85rem; letter-spacing: 1px;">
+                FIELD HUB</span>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px;">Dashboard Lapangan</h1>
+            <p class="text-muted fs-5 mb-0">Halo, <strong>{{ karyawan.nama }}</strong>. Selamat bertugas & melayani hari
+                ini.</p>
+        </div>
+        <div class="text-end pb-1">
+            <span class="badge bg-white shadow-sm text-dark px-3 py-2 rounded-pill fw-bold border">
+                <i class="bi bi-clock me-1 text-gold"></i> {{ "now"|date:"l, d M Y" }}
+            </span>
+        </div>
     </div>
 
-    <h5 class="text-muted mb-3">Daftar Tugas Aktif:</h5>
+    <!-- SECTION TITLE -->
+    <div class="d-flex align-items-center mb-4">
+        <div class="bg-primary-custom bg-opacity-10 text-primary-custom rounded-circle p-2 me-3 d-flex align-items-center justify-content-center"
+            style="width: 44px; height: 44px;">
+            <i class="bi bi-list-stars fs-4"></i>
+        </div>
+        <h4 class="fw-800 mb-0 text-dark" style="font-family: 'Montserrat';">Tugas Aktif Lapangan</h4>
+    </div>
 
-    <div class="row g-3">
+    <div class="row g-4">
         {% for item in daftar_tugas %}
         <div class="col-12 col-md-6">
-            <div class="card shadow-sm border-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h5 class="card-title fw-bold">{{ item.kode_permohonan }}</h5>
-                        <span class="badge bg-warning text-dark">{{ item.status_proses }}</span>
+            <div class="card card-master border-start border-primary-custom border-5 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <span class="badge bg-light text-dark mb-2 px-3 py-2 rounded-pill fw-bold border">{{
+                                item.kode_permohonan }}</span>
+                            <h5 class="task-title mb-0">{{ item.layanan.nama_layanan }}</h5>
+                        </div>
+                        <div
+                            class="bg-warning bg-opacity-10 text-dark px-3 py-2 rounded-4 fw-bold small border border-warning border-opacity-25 shadow-sm">
+                            <i class="bi bi-hourglass-split me-1"></i> {{ item.status_proses }}
+                        </div>
                     </div>
-                    <p class="card-text mb-1">
-                        <strong>Layanan:</strong> {{ item.layanan.nama_layanan }}<br>
-                        <strong>Pelanggan:</strong> {{ item.pelanggan.nama }}<br>
-                        <strong>No WA:</strong> {{ item.pelanggan.no_whatsapp }}
-                        <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank" class="text-success text-decoration-none">
-                            (Chat WA)
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="info-label">Pelanggan</div>
+                            <div class="fw-800 text-dark">{{ item.pelanggan.nama }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Kontak WhatsApp</div>
+                            <div class="fw-bold">
+                                <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank"
+                                    class="wa-link text-decoration-none d-flex align-items-center">
+                                    <i class="bi bi-whatsapp me-2 fs-5"></i>
+                                    <span>{{ item.pelanggan.no_whatsapp }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <a href="{% url 'lapangan_detail' item.id %}"
+                            class="btn btn-light flex-grow-1 py-3 rounded-pill fw-bold border-0 text-muted shadow-sm">
+                            <i class="bi bi-folder2-open me-1"></i> LIHAT BERKAS
                         </a>
-                    </p>
-                    <hr>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <a href="{% url 'lapangan_detail' item.id %}" class="btn btn-outline-dark w-100">
-                                📂 Detail
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="{% url 'update_status_lapangan' item.id %}" class="btn btn-primary w-100">
-                                🚀 Update
-                            </a>
-                        </div>
+                        <a href="{% url 'update_status_lapangan' item.id %}"
+                            class="btn btn-primary-custom flex-grow-1 py-3 rounded-pill fw-bold shadow-lg">
+                            <i class="bi bi-arrow-repeat me-1"></i> UPDATE PROGRES
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12 text-center py-5">
-            <p class="text-muted">Tidak ada tugas saat ini. Santai dulu! ☕</p>
+            <div class="mb-4">
+                <i class="bi bi-cup-hot display-1 text-muted opacity-25"></i>
+            </div>
+            <h4 class="fw-800 text-muted" style="font-family: 'Montserrat';">Semua Tugas Beres!</h4>
+            <p class="text-muted">Tidak ada tugas aktif di lapangan saat ini. Waktunya istirahat sejenak.</p>
         </div>
         {% endfor %}
     </div>

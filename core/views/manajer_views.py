@@ -281,7 +281,7 @@ def manajer_karyawan_edit_view(request, karyawan_id):
         messages.success(request, "Data karyawan diupdate.")
         return redirect('manajer_karyawan_list')
     
-    return render(request, 'core/manajer/manajer_karyawan_form.html', {'karyawan': karyawan})
+    return render(request, 'core/manajer/manajer_karyawan_form.html', {'item': karyawan})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -303,26 +303,97 @@ def manajer_karyawan_delete_view(request, karyawan_id):
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_list_view(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        # 1. Handle Layanan Deletion
+        if 'layanan_id' in request.POST and action == 'delete_layanan':
+            layanan_id = request.POST.get('layanan_id')
+            Layanan.objects.filter(id=layanan_id).delete()
+            messages.success(request, "Layanan dihapus.")
+            return redirect('master_layanan_list')
+        
+        # 2. Handle MasterDokumen Deletion
+        if 'delete_id' in request.POST and action == 'delete_dokumen':
+            doc_id = request.POST.get('delete_id')
+            MasterDokumen.objects.filter(id=doc_id).delete()
+            messages.success(request, "Dokumen dihapus.")
+            return redirect('master_layanan_list')
+
+        # 3. Handle Toggle Syarat (Matrix)
+        if action == 'toggle_syarat':
+            lay_id = request.POST.get('layanan_id')
+            dok_id = request.POST.get('dokumen_id')
+            layanan = get_object_or_404(Layanan, id=lay_id)
+            master_dok = get_object_or_404(MasterDokumen, id=dok_id)
+            
+            syarat, created = LayananDokumen.objects.get_or_create(layanan=layanan, master_dokumen=master_dok)
+            if not created:
+                syarat.delete()
+                messages.info(request, f"Syarat {master_dok.nama_dokumen} dihapus dari {layanan.nama_layanan}.")
+            else:
+                messages.success(request, f"Syarat {master_dok.nama_dokumen} ditambahkan ke {layanan.nama_layanan}.")
+            return redirect('master_layanan_list')
+
+        # 4. Handle Toggle Wajib (Matrix)
+        if action == 'toggle_wajib':
+            lay_id = request.POST.get('layanan_id')
+            dok_id = request.POST.get('dokumen_id')
+            syarat = get_object_or_404(LayananDokumen, layanan_id=lay_id, master_dokumen_id=dok_id)
+            syarat.is_wajib = not syarat.is_wajib
+            syarat.save()
+            status = "WAJIB" if syarat.is_wajib else "OPSIONAL"
+            messages.success(request, f"Status {syarat.master_dokumen.nama_dokumen} diubah menjadi {status}.")
+            return redirect('master_layanan_list')
+
     layanan_list = Layanan.objects.all().order_by('nama_layanan')
-    return render(request, 'core/manajer/master_layanan_list.html', {'layanan_list': layanan_list})
+    master_dokumen_list = MasterDokumen.objects.all().order_by('nama_dokumen')
+    
+    # Ambil pemetaan untuk matriks
+    mapping_qs = LayananDokumen.objects.all()
+    matrix_mapping = {(m.layanan_id, m.master_dokumen_id): m for m in mapping_qs}
+    
+    # Restrukturisasi data agar mudah di-loop di template (Matrix Data)
+    matrix_rows = []
+    for lay in layanan_list:
+        row_cells = []
+        for dok in master_dokumen_list:
+            syarat = matrix_mapping.get((lay.id, dok.id))
+            row_cells.append({
+                'dokumen_id': dok.id,
+                'syarat': syarat # Berisi objek LayananDokumen jika ada, else None
+            })
+        matrix_rows.append({
+            'layanan': lay,
+            'cells': row_cells
+        })
+    
+    context = {
+        'layanan_list': layanan_list,
+        'master_dokumen_list': master_dokumen_list,
+        'matrix_rows': matrix_rows, # Data baru untuk matrix
+    }
+    return render(request, 'core/manajer/master_layanan_list.html', context)
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_layanan_form_view(request, layanan_id=None):
-    layanan = None
+    item = None
+    is_edit = False
     if layanan_id:
-        layanan = get_object_or_404(Layanan, id=layanan_id)
+        item = get_object_or_404(Layanan, id=layanan_id)
+        is_edit = True
     
     if request.method == 'POST':
         nama = request.POST.get('nama_layanan')
         harga = request.POST.get('harga_jasa')
         estimasi = request.POST.get('estimasi_waktu')
         
-        if layanan:
-            layanan.nama_layanan = nama
-            layanan.harga_jasa = harga
-            layanan.estimasi_waktu = estimasi
-            layanan.save()
+        if item:
+            item.nama_layanan = nama
+            item.harga_jasa = harga
+            item.estimasi_waktu = estimasi
+            item.save()
             messages.success(request, "Layanan diupdate.")
         else:
             kode = f"LAY-{Layanan.objects.count() + 1}"
@@ -330,7 +401,7 @@ def master_layanan_form_view(request, layanan_id=None):
             messages.success(request, "Layanan ditambahkan.")
         return redirect('master_layanan_list')
     
-    return render(request, 'core/manajer/master_layanan_form.html', {'layanan': layanan})
+    return render(request, 'core/manajer/master_layanan_form.html', {'item': item, 'is_edit': is_edit})
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
@@ -371,33 +442,40 @@ def master_layanan_requirements_view(request, layanan_id):
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_dokumen_list_view(request):
-    if request.method == 'POST' and 'delete_id' in request.POST:
-        doc_id = request.POST.get('delete_id')
-        MasterDokumen.objects.filter(id=doc_id).delete()
-        messages.success(request, "Dokumen dihapus.")
-        return redirect('master_dokumen_list')
-    
-    dokumen_list = MasterDokumen.objects.all().order_by('nama_dokumen')
-    return render(request, 'core/manajer/master_dokumen_list.html', {'dokumen_list': dokumen_list})
+    # Sekarang sudah digabung ke Master Control Center
+    return redirect('master_layanan_list')
 
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def master_dokumen_form_view(request, doc_id=None):
-    dokumen = None
+    item = None
+    is_edit = False
     if doc_id:
-        dokumen = get_object_or_404(MasterDokumen, id=doc_id)
+        item = get_object_or_404(MasterDokumen, id=doc_id)
+        is_edit = True
     
     if request.method == 'POST':
         nama = request.POST.get('nama_dokumen')
         desk = request.POST.get('deskripsi')
         
-        if dokumen:
-            dokumen.nama_dokumen = nama
-            dokumen.deskripsi = desk
-            dokumen.save()
+        if item:
+            # Jika sedang edit, pastikan nama baru tidak dipunyai dokumen lain
+            if MasterDokumen.objects.filter(nama_dokumen=nama).exclude(id=doc_id).exists():
+                messages.error(request, f"Dokumen dengan nama '{nama}' sudah ada.")
+                return render(request, 'core/manajer/master_dokumen_form.html', {'item': item, 'is_edit': is_edit})
+            
+            item.nama_dokumen = nama
+            item.deskripsi = desk
+            item.save()
+            messages.success(request, "Data diupdate.")
         else:
+            # Jika sedang tambah baru, pastikan nama belum ada
+            if MasterDokumen.objects.filter(nama_dokumen=nama).exists():
+                messages.error(request, f"Dokumen dengan nama '{nama}' sudah ada.")
+                return render(request, 'core/manajer/master_dokumen_form.html', {'item': item, 'is_edit': is_edit})
+            
             MasterDokumen.objects.create(nama_dokumen=nama, deskripsi=desk)
-        messages.success(request, "Data disimpan.")
+            messages.success(request, "Data disimpan.")
         return redirect('master_dokumen_list')
     
-    return render(request, 'core/manajer/master_dokumen_form.html', {'dokumen': dokumen})
+    return render(request, 'core/manajer/master_dokumen_form.html', {'item': item, 'is_edit': is_edit})

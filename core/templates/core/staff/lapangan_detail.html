@@ -1,53 +1,161 @@
 {% extends 'core/shared/base.html' %}
 {% block title %}Detail Tugas{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0">📁 Detail Tugas</h5>
-        <a href="{% url 'lapangan_dashboard' %}" class="btn btn-sm btn-outline-secondary">Kembali</a>
+<style>
+    .field-detail {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .section-header {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .wa-link {
+        color: #25d366;
+        transition: all 0.2s;
+    }
+
+    .wa-link:hover {
+        color: #128c7e;
+    }
+
+    .doc-preview-card {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #f1f5f9;
+        transition: all 0.2s;
+    }
+
+    .doc-preview-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        border-color: var(--primary-green);
+    }
+</style>
+
+<div class="container py-4 field-detail">
+    <!-- NAVIGATION & TITLE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'lapangan_dashboard' %}" class="text-decoration-none text-muted fw-bold small">
+            <i class="bi bi-arrow-left me-1"></i> KEMBALI KE DASHBOARD
+        </a>
+        <span
+            class="badge bg-gold text-dark rounded-pill px-3 py-2 fw-800 shadow-sm border border-warning border-opacity-25">
+            <i class="bi bi-folder2-open me-1"></i> DETAIL BERKAS
+        </span>
     </div>
 
-    <div class="card shadow-sm border-primary mb-4">
-        <div class="card-header bg-primary text-white">
-            {{ item.kode_permohonan }}
+    <!-- MAIN JOB CARD -->
+    <div class="card card-master mb-5">
+        <div
+            class="card-header bg-primary-custom text-white py-4 px-4 border-0 d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="section-header mb-0">{{ item.kode_permohonan }}</h4>
+                <p class="small text-white opacity-75 mb-0">Layanan: {{ item.layanan.nama_layanan }}</p>
+            </div>
+            <div class="bg-white bg-opacity-20 rounded-3 p-2 d-flex align-items-center justify-content-center"
+                style="width: 48px; height: 48px;">
+                <i class="bi bi-journal-check fs-4"></i>
+            </div>
         </div>
-        <div class="card-body">
-            <p class="mb-1"><strong>Layanan:</strong><br> {{ item.layanan.nama_layanan }}</p>
-            <hr>
-            <p class="mb-1"><strong>Nama Pelanggan:</strong><br> {{ item.pelanggan.nama }}</p>
-            <p class="mb-1"><strong>Kontak (WA):</strong><br> {{ item.pelanggan.no_whatsapp }} 
-                <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank" class="text-success ms-2"><i class="bi bi-whatsapp"></i> Chat</a>
-            </p>
-            <p class="mb-0"><strong>Alamat:</strong><br> {{ item.pelanggan.alamat_lengkap|default:"-" }}</p>
-        </div>
-        <div class="card-footer bg-white">
-             <a href="{% url 'update_status_lapangan' item.id %}" class="btn btn-primary w-100 fw-bold">
-                🚀 Update Status
-            </a>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="info-label">Nama Pelanggan</div>
+                    <div class="fw-800 text-dark fs-5">{{ item.pelanggan.nama }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-label">Kontak (WhatsApp)</div>
+                    <div class="fw-bold fs-5">
+                        <a href="https://wa.me/{{ item.pelanggan.no_whatsapp }}" target="_blank"
+                            class="wa-link text-decoration-none d-flex align-items-center">
+                            <i class="bi bi-whatsapp me-2"></i>
+                            <span>{{ item.pelanggan.no_whatsapp }}</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-label">Alamat / Domisili</div>
+                    <div class="fw-bold text-dark">{{ item.pelanggan.alamat_lengkap|default:"Alamat belum diinput
+                        pelanggan." }}</div>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-10">
+
+            <div class="d-grid mt-2">
+                <a href="{% url 'update_status_lapangan' item.id %}"
+                    class="btn btn-primary-custom py-3 rounded-pill fw-bold shadow-lg">
+                    <i class="bi bi-arrow-repeat me-1"></i> UPDATE PROGRES TERKINI
+                </a>
+            </div>
         </div>
     </div>
 
-    <h6 class="fw-bold text-muted mb-3">Dokumen Pelanggan:</h6>
-    <div class="row g-3">
+    <!-- DOCUMENTS SECTION -->
+    <div class="d-flex align-items-center mb-4">
+        <div class="bg-gold bg-opacity-10 text-gold rounded-circle p-2 me-3"
+            style="width: 40px; height: 40px; display: flex; align-items:center; justify-content:center;">
+            <i class="bi bi-files fs-4"></i>
+        </div>
+        <h5 class="fw-bold mb-0 text-dark">Arsip Dokumen Pelanggan</h5>
+    </div>
+
+    <div class="row g-4">
         {% for dok in dokumen_list %}
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light small fw-bold">
-                    {{ dok.master_dokumen.nama_dokumen }}
-                </div>
-                <div class="card-body p-0 text-center bg-dark">
+            <div class="card doc-preview-card">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-800 text-dark">{{ dok.master_dokumen.nama_dokumen }}</span>
                     {% if dok.path_file %}
-                        {% if dok.is_pdf %}
-                            <div style="height: 300px;">
-                                <iframe src="{{ dok.path_file.url }}" width="100%" height="100%" style="border:none;"></iframe>
-                            </div>
-                            <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-light w-100 rounded-0">Buka PDF Penuh</a>
-                        {% else %}
-                            <img src="{{ dok.path_file.url }}" class="img-fluid" style="max-height: 400px;">
-                            <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-light w-100 rounded-0">Lihat Gambar Penuh</a>
-                        {% endif %}
+                    <a href="{{ dok.path_file.url }}" target="_blank"
+                        class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                        <i class="bi bi-zoom-in me-1"></i> Ukuran Penuh
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0 bg-dark d-flex align-items-center justify-content-center"
+                    style="min-height: 400px;">
+                    {% if dok.path_file %}
+                    {% if dok.is_pdf %}
+                    <iframe src="{{ dok.path_file.url }}" width="100%" height="500px" style="border:none;"></iframe>
                     {% else %}
-                        <div class="p-3 text-white">File tidak ada</div>
+                    <img src="{{ dok.path_file.url }}" class="img-fluid"
+                        style="max-height: 500px; box-shadow: 0 0 40px rgba(0,0,0,0.5);">
+                    {% endif %}
+                    {% else %}
+                    <div class="text-white opacity-25 py-5 text-center">
+                        <i class="bi bi-file-earmark-x display-1 d-block mb-3"></i>
+                        <span class="fw-bold">FILE TIDAK DITEMUKAN</span>
+                    </div>
                     {% endif %}
                 </div>
             </div>

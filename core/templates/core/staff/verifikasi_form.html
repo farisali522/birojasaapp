@@ -1,152 +1,253 @@
-{% extends 'core/shared/base.html' %}
-{% load rupiah_filters %} 
+{% load rupiah_filters %}
 
-{% block title %}Verifikasi Dokumen{% endblock %}
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        
-        <div class="col-md-7">
-            
-            <div class="card shadow-sm mb-4 border-primary">
-                <div class="card-header bg-primary text-white fw-bold">
-                    <i class="bi bi-info-circle me-2"></i>Data Permohonan
+<style>
+    .verification-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(47, 79, 79, 0.1);
+    }
+
+    .sticky-decision {
+        position: sticky;
+        top: 100px;
+    }
+
+    .doc-preview-card {
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+    .doc-preview-card:hover {
+        border-color: var(--primary-green);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+</style>
+
+<div class="container py-5 verification-container">
+    <div class="row g-4">
+
+        <!-- LEFT COLUMN: DOCUMENT DATA & PREVIEW -->
+        <div class="col-lg-7">
+            <!-- BACK BUTTON -->
+            <div class="mb-4">
+                <a href="{% url 'staff_dashboard' %}" class="text-decoration-none text-muted fw-bold small">
+                    <i class="bi bi-arrow-left me-1"></i> KEMBALI KE DASHBOARD
+                </a>
+            </div>
+
+            <div class="card card-master mb-5">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-custom text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                            style="width: 48px; height: 48px;">
+                            <i class="bi bi-info-circle fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="section-header mb-0">Detail Permohonan</h4>
+                            <p class="text-muted small mb-0">{{ item.kode_permohonan }} — {{ item.created_at|date:"d M
+                                Y, H:i" }}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-4 text-muted">Kode</div>
-                        <div class="col-8 fw-bold">{{ item.kode_permohonan }}</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-4 text-muted">Pelanggan</div>
-                        <div class="col-8">{{ item.pelanggan.nama }}</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-4 text-muted">Layanan</div>
-                        <div class="col-8">{{ item.layanan.nama_layanan }}</div>
-                    </div>
-                    <div class="row mb-0">
-                        <div class="col-4 text-muted">Catatan</div>
-                        <div class="col-8 fst-italic">{{ item.catatan_pelanggan|default:"-" }}</div>
+                <div class="card-body p-4 pt-0">
+                    <hr class="opacity-10 mb-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted d-block">Pelanggan</label>
+                            <span class="fw-bold fs-5 text-dark">{{ item.pelanggan.nama }}</span>
+                            <div class="small text-muted">{{ item.pelanggan.email }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted d-block">Layanan Jasa</label>
+                            <span class="fw-bold fs-5 text-secondary">{{ item.layanan.nama_layanan }}</span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted d-block">Catatan Pelanggan</label>
+                            <div class="p-3 bg-light rounded-3 fst-italic shadow-inner">
+                                "{{ item.catatan_pelanggan|default:"Tidak ada catatan khusus." }}"
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <h5 class="fw-bold mt-4 mb-3 text-secondary">📂 Dokumen Diupload:</h5>
-            <div class="row g-3">
+            <h5 class="section-header mb-4 d-flex align-items-center text-dark">
+                <i class="bi bi-folder2-open me-2 text-gold"></i> Berkas Dokumen Upload
+            </h5>
+
+            <div class="row g-4">
                 {% for dok in dokumen_list %}
-                <div class="col-md-12">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-dark">{{ dok.master_dokumen.nama_dokumen }}</span>
-                            
+                <div class="col-12">
+                    <div class="card doc-preview-card">
+                        <div
+                            class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                            <span class="fw-800 text-dark">{{ dok.master_dokumen.nama_dokumen }}</span>
                             {% if dok.path_file %}
-                                <a href="{{ dok.path_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-box-arrow-up-right"></i> Buka Asli
-                                </a>
+                            <a href="{{ dok.path_file.url }}" target="_blank"
+                                class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                <i class="bi bi-zoom-in me-1"></i> Lihat Ukuran Penuh
+                            </a>
                             {% endif %}
                         </div>
 
-                        <div class="card-body p-0 text-center bg-dark d-flex align-items-center justify-content-center" style="height: 400px; overflow: hidden;">
-                            
+                        <div class="card-body p-0 bg-dark d-flex align-items-center justify-content-center"
+                            style="min-height: 400px; height: 500px;">
                             {% if dok.path_file %}
-                                
-                                {% if dok.is_pdf %}
-                                    <iframe src="{{ dok.path_file.url }}" width="100%" height="100%" style="border: none;">
-                                        Browser Anda tidak mendukung preview PDF.
-                                    </iframe>
-                                {% else %}
-                                    <img src="{{ dok.path_file.url }}" alt="Preview" 
-                                         class="img-fluid" 
-                                         style="max-height: 100%; width: auto;">
-                                {% endif %}
-
+                            {% if dok.is_pdf %}
+                            <iframe src="{{ dok.path_file.url }}" width="100%" height="100%"
+                                style="border: none;"></iframe>
                             {% else %}
-                                <div class="text-white opacity-50">
-                                    <i class="bi bi-exclamation-circle display-4"></i><br>
-                                    File tidak ditemukan
-                                </div>
+                            <img src="{{ dok.path_file.url }}" alt="Preview" class="img-fluid"
+                                style="max-height: 100%; width: auto; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
                             {% endif %}
-                            
+                            {% else %}
+                            <div class="text-white opacity-25 text-center">
+                                <i class="bi bi-file-earmark-x display-1 mb-3"></i>
+                                <p class="fw-bold">FILE TIDAK TERSEDIA</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 {% empty %}
                 <div class="col-12">
-                    <div class="alert alert-warning">
-                        Pelanggan belum mengupload dokumen apa pun.
+                    <div class="alert bg-warning bg-opacity-10 text-warning border-0 rounded-4 p-4 text-center">
+                        <i class="bi bi-exclamation-triangle fs-2 d-block mb-2"></i>
+                        <span class="fw-bold">Belum ada dokumen yang diupload oleh pelanggan.</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="col-md-5">
-            <div class="card shadow border-0 bg-white sticky-top" style="top: 100px; z-index: 100;">
-                <div class="card-header bg-success text-white fw-bold py-3">
-                    <i class="bi bi-check-circle me-2"></i>Keputusan Verifikasi
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">Biaya Jasa Admin</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">Rp</span>
-                                <input type="text" class="form-control bg-white fw-bold" value="{{ item.layanan.harga_jasa|rupiah }}" disabled>
+        <!-- RIGHT COLUMN: DECISION PANEL (STICKY) -->
+        <div class="col-lg-5">
+            <div class="sticky-decision">
+                <div class="card card-master">
+                    <div class="card-header bg-primary-custom text-white py-4 px-4 border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle fs-3 me-3"></i>
+                            <div>
+                                <h5 class="fw-800 mb-0" style="font-family: 'Montserrat';">Hasil Verifikasi</h5>
+                                <p class="small text-white opacity-75 mb-0">Tentukan rincian biaya resmi dan ongkir.</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark">Input Biaya Resmi (Pajak/PNBP)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" name="biaya_resmi" class="form-control form-control-lg border-success" placeholder="0" required>
+                            <!-- BIAYA ADMIN (READONLY) -->
+                            <div class="mb-4">
+                                <label class="form-label">Biaya Jasa Biro Jaya</label>
+                                <input type="text" class="form-control bg-light border-0 fw-bold fs-5 text-dark"
+                                    value="{{ item.layanan.harga_jasa|rupiah }}" readonly>
+                                <div class="form-text small">Ini adalah tarif resmi jasa yang Anda tentukan di master.
+                                </div>
                             </div>
-                            <div class="form-text">Lihat nominal di dokumen Notice Pajak.</div>
-                        </div>
 
-                        <hr class="my-4">
+                            <!-- BIAYA RESMI -->
+                            <div
+                                class="mb-4 p-3 rounded-4 bg-light bg-opacity-50 border border-success border-opacity-25">
+                                <label class="form-label text-success fw-bold">Nominal Pajak / PNBP (Resmi)</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text border-success bg-white text-success">Rp</span>
+                                    <input type="number" name="biaya_resmi"
+                                        class="form-control form-control-lg border-success fw-800" placeholder="0"
+                                        required>
+                                </div>
+                                <div class="form-text small text-muted"><i class="bi bi-info-circle me-1"></i> Masukkan
+                                    angka saja, tanpa titik atau koma.</div>
+                            </div>
 
-                        {% if item.metode_pengiriman == 'Kirim Kurir' %}
-                            <div class="alert alert-warning border-warning mb-3">
-                                <div class="d-flex">
-                                    <i class="bi bi-truck fs-4 me-3"></i>
+                            <hr class="my-4 opacity-10">
+
+                            <!-- BIAYA ONGKIR -->
+                            {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                            <div class="alert bg-gold bg-opacity-10 text-gold border-0 rounded-4 p-3 mb-4">
+                                <div class="d-flex align-items-middle">
+                                    <i class="bi bi-truck fs-3 me-3"></i>
                                     <div>
-                                        <h6 class="fw-bold text-dark mb-1">Butuh Pengiriman</h6>
-                                        <p class="mb-0 small text-muted">{{ item.pelanggan.alamat_lengkap|default:"Alamat tidak ditemukan!" }}</p>
+                                        <h6 class="fw-bold mb-1">Butuh Pengiriman</h6>
+                                        <p class="mb-0 small opacity-75">{{
+                                            item.pelanggan.alamat_lengkap|default:"Alamat belum diinput." }}</p>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="mb-4">
-                                <label class="form-label fw-bold text-success">Input Biaya Ongkir</label>
+                                <label class="form-label">Biaya Pengiriman (Ongkir)</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="number" name="biaya_pengiriman" class="form-control border-success" placeholder="Cek tarif kurir..." required>
+                                    <span class="input-group-text bg-white border-gold text-gold">Rp</span>
+                                    <input type="number" name="biaya_pengiriman" class="form-control border-gold"
+                                        placeholder="Input tarif kurir..." required>
                                 </div>
                             </div>
-                        {% else %}
-                            <div class="alert alert-secondary d-flex align-items-center mb-4">
-                                <i class="bi bi-building fs-4 me-3"></i>
-                                <div>
-                                    <strong>Ambil di Kantor</strong><br>
-                                    <small>Tidak ada biaya kirim.</small>
-                                </div>
+                            {% else %}
+                            <div class="bg-secondary bg-opacity-10 rounded-4 p-3 mb-4 text-center">
+                                <i class="bi bi-building fs-3 text-secondary d-block mb-1"></i>
+                                <span class="fw-bold text-secondary">Ambil di Kantor</span>
+                                <div class="small text-muted">Bebas biaya pengiriman.</div>
                             </div>
                             <input type="hidden" name="biaya_pengiriman" value="0">
-                        {% endif %}
+                            {% endif %}
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg py-3 shadow-sm">
-                                ✔ Verifikasi & Terbitkan Tagihan
-                            </button>
-                            <a href="{% url 'tolak_permohonan' item.id %}" class="btn btn-outline-danger">
-                                ✖ Tolak Permohonan
-                            </a>
-                        </div>
-                    </form>
+                            <div class="d-grid gap-3 pt-3">
+                                <button type="submit"
+                                    class="btn btn-primary-custom py-3 rounded-pill fw-bold shadow-lg">
+                                    <i class="bi bi-file-earmark-check me-1"></i> Terbitkan Tagihan & Lanjut
+                                </button>
+                                <a href="{% url 'tolak_permohonan' item.id %}"
+                                    class="btn btn-outline-danger py-2 rounded-pill fw-bold small">
+                                    <i class="bi bi-x-circle me-1"></i> Tolak Permohonan
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

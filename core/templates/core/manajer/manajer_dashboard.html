@@ -1,164 +1,263 @@
 {% extends 'core/shared/base.html' %}
 {% load rupiah_filters %}
 
-{% block title %}Executive Dashboard{% endblock %}
 {% block content %}
-
 <style>
-    .nav-pills .nav-link {
-        color: #2F4F4F !important;
-        /* Dark Green text for inactive */
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        padding: 10px 20px;
-        font-weight: 600;
-        border-radius: 8px;
-        /* Tambahkan sedikit rounding */
+    /* UI PREMIUM ENHANCEMENTS */
+    .dashboard-container {
+        animation: fadeIn 0.5s ease-out;
     }
 
-    /* Warna saat Tab Aktif/Diklik */
-    .nav-pills .nav-link.active {
-        background-color: #2F4F4F !important;
-        /* Background Hijau */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* STATS CARDS */
+    .stat-card {
+        border-radius: 20px;
+        border: none;
+        padding: 24px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 100px;
+        height: 100px;
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 50%;
+        z-index: 1;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .icon-revenue {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .icon-users {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .icon-tasks {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    /* CUSTOM TAB SYSTEM */
+    .custom-tabs-wrapper {
+        background: #fff;
+        padding: 8px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        display: inline-flex;
+        margin-bottom: 2.5rem;
+    }
+
+    .custom-nav-link {
+        border: none !important;
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        padding: 12px 24px !important;
+        border-radius: 12px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .custom-nav-link.active {
+        background-color: var(--primary-green) !important;
         color: #fff !important;
-        /* Teks Putih */
-        border-color: #2F4F4F;
+        box-shadow: 0 8px 16px rgba(6, 78, 59, 0.15) !important;
     }
 
-    .nav-pills .nav-link:hover:not(.active) {
-        background-color: #e9ecef;
-        color: #1e3333 !important;
+    /* QUICK ACTIONS */
+    .action-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 24px;
+        border: 1px solid #f1f5f9;
+        transition: all 0.2s;
+        text-align: center;
+    }
+
+    .action-card:hover {
+        border-color: var(--primary-green);
+        background: #fdfdfd;
+    }
+
+    .action-icon {
+        font-size: 2rem;
+        color: var(--primary-green);
+        margin-bottom: 12px;
+        display: block;
     }
 </style>
-<div class="container py-5">
 
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="fw-bold text-dark" style="font-family: 'Montserrat', sans-serif;">Dashboard Manajer</h2>
-            <p class="text-muted">Selamat datang, {{ karyawan.nama }}. Berikut ringkasan bisnis Anda.</p>
+<div class="container py-5 dashboard-container">
+    <!-- HEADER -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-8">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 fw-bold">EXECUTIVE
+                VIEW</span>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px;">Dashboard Manajer</h1>
+            <p class="text-muted mb-0 fs-5">Selamat datang kembali, <span class="text-dark fw-bold">
+                    {{ karyawan.nama }}</span>. Pantau performa bisnis Anda secara real-time.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+            <div class="d-flex flex-column align-items-md-end gap-2">
+                <a href="{% url 'laporan_keuangan' %}" class="btn btn-primary-custom px-4 rounded-pill shadow-sm">
+                    <i class="bi bi-graph-up-arrow me-2"></i> Laporan Detail
+                </a>
+                <a href="{% url 'cetak_laporan_gabungan' %}" class="btn btn-outline-danger px-4 rounded-pill btn-sm">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Cetak Laporan PDF
+                </a>
+            </div>
         </div>
     </div>
 
+    <!-- STATS ROW -->
     <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-success h-100">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase">Total Pendapatan</h6>
-                    <h2 class="fw-bold text-success display-6">{{ total_uang|rupiah }}</h2>
-                    <a href="{% url 'laporan_keuangan' %}" class="btn btn-sm btn-outline-success mt-2">Lihat Laporan
-                        Detail ➔</a>
-                    <a href="{% url 'cetak_laporan_gabungan' %}" class="btn btn-sm btn-danger mt-2">
-                        <i class="bi bi-file-earmark-pdf"></i> Cetak Laporan PDF
-                    </a>
+        <div class="col-lg-4 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-revenue">
+                    <i class="bi bi-cash-stack"></i>
                 </div>
+                <h6 class="text-muted fw-bold text-uppercase mb-1 small">Total Pendapatan</h6>
+                <h2 class="fw-800 mb-0">{{ total_uang|rupiah|default:"Rp 0" }}</h2>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm border-primary h-100">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase">Total Pelanggan</h6>
-                    <h2 class="fw-bold text-primary display-6">{{ total_pelanggan }}</h2>
-                    <small>Orang terdaftar</small>
+        <div class="col-lg-4 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-users">
+                    <i class="bi bi-people-fill"></i>
                 </div>
+                <h6 class="text-muted fw-bold text-uppercase mb-1 small">Total Pelanggan</h6>
+                <h2 class="fw-800 mb-0">{{ total_pelanggan }}</h2>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm border-warning h-100">
-                <div class="card-body text-center">
-                    <h6 class="text-muted text-uppercase">Total Transaksi</h6>
-                    <h2 class="fw-bold text-dark display-6">{{ total_permohonan }}</h2>
-                    <small>Permohonan masuk</small>
+        <div class="col-lg-4 col-md-12">
+            <div class="stat-card">
+                <div class="stat-icon icon-tasks">
+                    <i class="bi bi-check2-square"></i>
                 </div>
+                <h6 class="text-muted fw-bold text-uppercase mb-1 small">Total Transaksi</h6>
+                <h2 class="fw-800 mb-0">{{ total_permohonan }}</h2>
             </div>
         </div>
     </div>
 
-    <ul class="nav nav-pills mb-4 gap-2" id="manager-pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold" id="pills-status-tab" data-bs-toggle="pill"
-                data-bs-target="#pills-status" type="button">
-                📈 Monitoring Proses
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="pills-master-tab" data-bs-toggle="pill" data-bs-target="#pills-master"
-                type="button">
-                ⚙️ Pengaturan Master Data
-            </button>
-        </li>
-    </ul>
+    <!-- TABBED CONTENT -->
+    <div class="custom-tabs-wrapper" id="managerDashboardTabs" role="tablist">
+        <button class="custom-nav-link active" id="pills-status-tab" data-bs-toggle="pill"
+            data-bs-target="#pills-status" type="button" role="tab">
+            <i class="bi bi-activity"></i> <span>Monitoring Proses</span>
+        </button>
+        <button class="custom-nav-link" id="pills-master-tab" data-bs-toggle="pill" data-bs-target="#pills-master"
+            type="button" role="tab">
+            <i class="bi bi-shield-lock"></i> <span>Akses Admin</span>
+        </button>
+    </div>
 
-    <div class="tab-content" id="manager-pills-tabContent">
-
-        <div class="tab-pane fade show active" id="pills-status">
-            <div class="card shadow border-0">
-                <div class="card-header bg-white fw-bold py-3">
-                    Sebaran Status Permohonan
+    <div class="tab-content" id="managerDashboardTabsContent">
+        <!-- MONITORING PROSES -->
+        <div class="tab-pane fade show active" id="pills-status" role="tabpanel">
+            <div class="card card-master">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <h5 class="fw-bold text-dark mb-1">Sebaran Status Permohonan</h5>
+                    <p class="small text-muted mb-0">Rincian permohonan berdasarkan tahapan proses saat ini.</p>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-striped mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Status Proses</th>
-                                <th class="text-end pe-5">Jumlah Dokumen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stat in status_stats %}
-                            <tr>
-                                <td class="ps-4 fw-bold text-secondary">{{ stat.status_proses }}</td>
-                                <td class="text-end pe-5 fw-bold">{{ stat.jumlah }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="2" class="text-center text-muted py-3">Belum ada data transaksi untuk
-                                    dihitung.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="pills-master">
-            <div class="card shadow border-0">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-green);">Aksi Pengaturan Cepat:</h5>
-                    <div class="row g-4">
-
-                        <div class="col-md-4">
-                            <div class="card h-100 shadow-sm border-0 bg-light p-3">
-                                <i class="bi bi-people-fill fs-3" style="color: var(--primary-green);"></i>
-                                <h6 class="fw-bold mt-2 mb-3">Akun Karyawan</h6>
-                                <a href="{% url 'manajer_karyawan_list' %}" class="btn btn-primary-custom btn-sm">Akses
-                                    CRUD</a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="card h-100 shadow-sm border-0 bg-light p-3">
-                                <i class="bi bi-tags-fill fs-3" style="color: var(--primary-green);"></i>
-                                <h6 class="fw-bold mt-2 mb-3">Layanan & Harga</h6>
-                                <a href="{% url 'master_layanan_list' %}" class="btn btn-primary-custom btn-sm">Akses
-                                    CRUD</a>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="card h-100 shadow-sm border-0 bg-light p-3">
-                                <i class="bi bi-journal-text fs-3" style="color: var(--primary-green);"></i>
-                                <h6 class="fw-bold mt-2 mb-3">Master Dokumen</h6>
-                                <a href="{% url 'master_dokumen_list' %}" class="btn btn-primary-custom btn-sm">Akses
-                                    CRUD</a>
-                            </div>
-                        </div>
-
+                    <div class="table-responsive">
+                        <table class="table table-master table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Status Proses</th>
+                                    <th class="text-end pe-5">Jumlah Dokumen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in status_stats %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="fw-bold text-secondary">{{ stat.status_proses }}</span>
+                                    </td>
+                                    <td class="text-end pe-5 fw-800 fs-5">{{ stat.jumlah }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center py-5 text-muted">
+                                        <i class="bi bi-clipboard-x fs-1 d-block mb-3 opacity-25"></i>
+                                        Belum ada data transaksi.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- AKSES ADMIN / MASTER DATA -->
+        <div class="tab-pane fade" id="pills-master" role="tabpanel">
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5">
+                    <div class="action-card h-100">
+                        <i class="bi bi-person-badge action-icon"></i>
+                        <h6 class="fw-bold text-dark mb-2">Akun Karyawan</h6>
+                        <p class="small text-muted mb-3">Kelola akses staff admin, lapangan, dan keuangan.</p>
+                        <a href="{% url 'manajer_karyawan_list' %}"
+                            class="btn btn-sm btn-outline-primary px-3 rounded-pill">Kelola ➔</a>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="action-card h-100">
+                        <i class="bi bi-gear-wide-connected action-icon"></i>
+                        <h6 class="fw-bold text-dark mb-2">Kelola Layanan dan Dokumen</h6>
+                        <p class="small text-muted mb-3">Atur jenis layanan, harga jasa, dan persyaratan dokumen dalam
+                            satu matriks.</p>
+                        <a href="{% url 'master_layanan_list' %}"
+                            class="btn btn-sm btn-outline-primary px-3 rounded-pill">Kelola ➔</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

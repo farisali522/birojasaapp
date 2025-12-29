@@ -11,16 +11,26 @@ def render_to_pdf(template_src, context_dict={}):
     """
     Mengubah Template HTML menjadi File PDF (Bytes)
     """
-    template = get_template(template_src)
-    html  = template.render(context_dict)
-    result = BytesIO()
-    
-    # Konversi HTML ke PDF
-    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-    
-    if not pdf.err:
-        return result.getvalue() # Mengembalikan file PDF mentah
-    return None
+    if pisa is None:
+        print("❌ ERROR: xhtml2pdf (pisa) is None. Library might not be installed correctly in this process.")
+        return None
+
+    try:
+        template = get_template(template_src)
+        html  = template.render(context_dict)
+        result = BytesIO()
+        
+        # Konversi HTML ke PDF
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        
+        if not pdf.err:
+            return result.getvalue() # Mengembalikan file PDF mentah
+        else:
+            print(f"❌ PDF CONVERSION ERROR: {pdf.err}")
+            return None
+    except Exception as e:
+        print(f"❌ PDF EXCEPTION: {str(e)}")
+        return None
 
 # --- CLASS EMAIL THREAD (DENGAN ATTACHMENT) ---
 class EmailThread(threading.Thread):

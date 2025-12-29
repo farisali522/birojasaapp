@@ -1,49 +1,165 @@
 {% extends 'core/shared/base.html' %}
 {% block title %}Update Status{% endblock %}
 {% block content %}
-<div class="container py-4">
+<style>
+    .form-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .status-btn {
+        border-radius: 16px;
+        padding: 20px;
+        text-align: left;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid #f1f5f9;
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .status-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        border-color: var(--primary-green);
+    }
+
+    .status-btn .icon-bg {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 4rem;
+        opacity: 0.05;
+        transition: all 0.3s;
+    }
+
+    .status-btn:hover .icon-bg {
+        opacity: 0.1;
+        transform: scale(1.1);
+    }
+
+    .status-btn.active-status {
+        border-color: var(--primary-green);
+        background: rgba(47, 79, 79, 0.02);
+    }
+
+    .btn-finish {
+        background: var(--primary-green) !important;
+        color: white !important;
+        border: none !important;
+    }
+
+    .btn-finish:hover {
+        background: #243d3d !important;
+        color: white !important;
+    }
+</style>
+
+<div class="container py-4 form-container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white text-center">
-                    Update Progres: {{ item.kode_permohonan }}
+        <div class="col-lg-6">
+            <div class="card card-master">
+                <div class="card-header bg-white py-4 px-4 border-0 text-center">
+                    <div class="mb-3 d-inline-flex bg-primary-custom text-white rounded-3 align-items-center justify-content-center shadow-sm"
+                        style="width: 56px; height: 56px;">
+                        <i class="bi bi-arrow-repeat fs-3"></i>
+                    </div>
+                    <h4 class="fw-800 mb-0" style="font-family: 'Montserrat'; letter-spacing: -0.5px;">Update Progress
+                    </h4>
+                    <p class="text-muted small mb-0">{{ item.kode_permohonan }} — <span
+                            class="badge bg-gold text-dark rounded-pill px-2">{{ item.status_proses }}</span></p>
                 </div>
-                <div class="card-body p-4">
-                    <p class="text-center text-muted">Posisi saat ini: <strong>{{ item.status_proses }}</strong></p>
-                    
+                <div class="card-body p-4 pt-0">
+                    <hr class="opacity-10 mb-4">
+
                     <form method="POST">
                         {% csrf_token %}
-                        
-                        <label class="form-label fw-bold mb-3">Pilih Status Terbaru:</label>
-                        
+
+                        <label class="form-label text-muted small fw-bold mb-3 text-uppercase letter-spacing-1">PILIH
+                            STATUS TERBARU</label>
+
                         <div class="d-grid gap-3">
-                            <button type="submit" name="status_baru" value="Proses di SAMSAT/SATPAS" class="btn btn-outline-primary text-start p-3">
-                                🏢 <strong>Proses di SAMSAT/SATPAS</strong><br>
-                                <small>Saya sudah sampai di lokasi dan sedang mengurus.</small>
+                            <button type="submit" name="status_baru" value="Proses di SAMSAT/SATPAS"
+                                class="btn status-btn">
+                                <i class="bi bi-building icon-bg"></i>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 me-3">
+                                        <i class="bi bi-building fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-800 text-dark">Proses di SAMSAT/SATPAS</div>
+                                        <div class="small text-muted">Berkas sedang diproses petugas instansi.</div>
+                                    </div>
+                                </div>
                             </button>
 
-                            <button type="submit" name="status_baru" value="Cek Fisik Selesai" class="btn btn-outline-info text-start p-3">
-                                🚗 <strong>Cek Fisik Selesai</strong><br>
-                                <small>Kendaraan sudah digesek dan divalidasi.</small>
+                            <button type="submit" name="status_baru" value="Cek Fisik Selesai" class="btn status-btn">
+                                <i class="bi bi-truck icon-bg"></i>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info bg-opacity-10 text-info rounded-3 p-2 me-3">
+                                        <i class="bi bi-card-checklist fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-800 text-dark">Cek Fisik Selesai</div>
+                                        <div class="small text-muted">Kendaraan sudah divalidasi/gesek nomor.</div>
+                                    </div>
+                                </div>
                             </button>
 
-                            <button type="submit" name="status_baru" value="Menunggu Cetak" class="btn btn-outline-warning text-dark text-start p-3">
-                                🖨️ <strong>Menunggu Cetak</strong><br>
-                                <small>Berkas sudah masuk, tinggal menunggu jadi.</small>
+                            <button type="submit" name="status_baru" value="Menunggu Cetak" class="btn status-btn">
+                                <i class="bi bi-printer icon-bg"></i>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-3">
+                                        <i class="bi bi-printer fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-800 text-dark">Menunggu Cetak</div>
+                                        <div class="small text-muted">Dokumen sedang antre proses cetak.</div>
+                                    </div>
+                                </div>
                             </button>
-                            
-                            <hr>
 
-                            <button type="submit" name="status_baru" value="Selesai - Kembali ke Kantor" class="btn btn-success text-start p-3">
-                                ✅ <strong>Selesai & Kembali</strong><br>
-                                <small>Dokumen sudah jadi, saya otw balik ke kantor.</small>
+                            <div class="py-2">
+                                <hr class="opacity-10">
+                            </div>
+
+                            <button type="submit" name="status_baru" value="Selesai - Kembali ke Kantor"
+                                class="btn status-btn btn-finish shadow-lg">
+                                <i class="bi bi-check-circle icon-bg text-white opacity-25"></i>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-white bg-opacity-25 text-white rounded-3 p-2 me-3">
+                                        <i class="bi bi-check2-all fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-800">Selesai & Kembali</div>
+                                        <div class="small opacity-75">Dokumen sudah di tangan, otw balik kantor.</div>
+                                    </div>
+                                </div>
                             </button>
                         </div>
-
                     </form>
-                    
-                    <div class="text-center mt-4">
-                        <a href="{% url 'lapangan_dashboard' %}" class="text-muted">Kembali</a>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'lapangan_dashboard' %}" class="text-decoration-none text-muted fw-bold small">
+                            <i class="bi bi-arrow-left me-1"></i> KEMBALI KE PANEL LAPANGAN
+                        </a>
                     </div>
                 </div>
             </div>

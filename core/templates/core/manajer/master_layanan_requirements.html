@@ -1,31 +1,109 @@
 {% extends 'core/shared/base.html' %}
 {% block title %}Syarat Dokumen{% endblock %}
 {% block content %}
-<div class="container py-5">
+<style>
+    .matrix-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .requirement-item {
+        border-radius: 12px !important;
+        border: 1px solid #f1f5f9 !important;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+        cursor: pointer;
+        padding: 16px 20px;
+    }
+
+    .requirement-item:hover {
+        background-color: #f8fafc;
+        border-color: var(--primary-green) !important;
+    }
+
+    .form-check-input {
+        width: 1.5em;
+        height: 1.5em;
+        margin-top: 0.25em;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-green);
+        border-color: var(--primary-green);
+    }
+</style>
+
+<div class="container py-5 matrix-container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-0">
-                <div class="card-header bg-info text-white fw-bold">
-                    Atur Persyaratan Dokumen: {{ layanan.nama_layanan }}
+        <div class="col-lg-8">
+            <!-- BACK BUTTON -->
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <a href="{% url 'master_layanan_list' %}" class="text-decoration-none text-muted fw-bold small">
+                    <i class="bi bi-arrow-left me-1"></i> KEMBALI KE MASTER KONTROL
+                </a>
+                <span class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill fw-bold"
+                    style="font-size: 0.7rem;">CONFIGURATION MODE</span>
+            </div>
+
+            <div class="card card-master">
+                <div class="card-header bg-white py-4 px-4 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary-custom text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                                style="width: 48px; height: 48px;">
+                                <i class="bi bi-list-check fs-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-800 mb-0" style="font-family: 'Montserrat'; letter-spacing: -0.5px;">
+                                    Syarat Dokumen</h4>
+                                <p class="text-muted small mb-0">{{ layanan.nama_layanan }}</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'master_dokumen_add' %}" class="btn btn-sm btn-gold rounded-pill px-3 fw-bold">
+                            <i class="bi bi-plus-lg me-1"></i> Master Dokumen
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <p class="text-muted small mb-4">Centang dokumen yang WAJIB dibutuhkan untuk layanan ini.</p>
-                    
+                <div class="card-body p-4 pt-0">
+                    <hr class="opacity-10 mb-4">
+                    <p class="text-muted small mb-4 fw-bold text-uppercase" style="letter-spacing: 0.05em;">Pilih
+                        dokumen yang wajib dilampirkan pelanggan:</p>
+
                     <form method="POST">
                         {% csrf_token %}
-                        
-                        <div class="list-group mb-4">
-                            {% for doc in master_dokumen %}
-                            <label class="list-group-item d-flex gap-3">
-                                <input class="form-check-input flex-shrink-0" type="checkbox" name="doc_{{ doc.id }}" value="1" 
-                                       {% if doc.id in terpasang_ids %}checked{% endif %}>
-                                <div>
-                                    <h6 class="mb-0 fw-bold">{{ doc.nama_dokumen }}</h6>
-                                    <small class="text-muted">{{ doc.deskripsi|default:"Tanpa deskripsi" }}</small>
+
+                        <div class="list-group list-group-flush mb-4">
+                            {% for doc in all_dokumen %}
+                            <label class="list-group-item requirement-item d-flex align-items-start border-0">
+                                <input class="form-check-input me-3" type="checkbox" name="doc_{{ doc.id }}" value="1"
+                                    {% if doc.id in current_ids %}checked{% endif %}>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-800 text-dark">{{ doc.nama_dokumen }}</h6>
+                                    <p class="mb-0 text-muted small">{{ doc.deskripsi|default:"Gunakan dokumen asli atau
+                                        fotokopi sesuai instruksi." }}</p>
                                 </div>
                             </label>
                             {% empty %}
-                            <div class="list-group-item text-center text-danger">Belum ada Master Dokumen. Harap input di Admin Panel.</div>
+                            <div class="list-group-item text-center text-danger">Belum ada Master Dokumen. Harap input
+                                di Admin Panel.</div>
                             {% endfor %}
                         </div>
 

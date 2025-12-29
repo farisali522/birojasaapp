@@ -20,6 +20,7 @@
     <style>
         :root {
             --primary-green: #064e3b;
+            --primary-green-rgb: 6, 78, 59;
             --primary-dark: #022c22;
             --accent-gold: #fbbf24;
             --accent-gold-hover: #d97706;
@@ -41,6 +42,7 @@
         h5,
         h6,
         .navbar-brand,
+        .badge,
         .btn {
             font-family: 'Montserrat', sans-serif;
             letter-spacing: -0.5px;
@@ -106,6 +108,15 @@
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
             color: white;
+        }
+
+        .text-primary-custom {
+            color: var(--primary-green) !important;
+        }
+
+        .bg-primary-custom {
+            --bs-bg-opacity: 1;
+            background-color: rgba(var(--primary-green-rgb), var(--bs-bg-opacity)) !important;
         }
 
         .card {
