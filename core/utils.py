@@ -3,7 +3,8 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import get_template
 from io import BytesIO
-from xhtml2pdf import pisa
+try: from xhtml2pdf import pisa
+except ImportError: pisa = None
 
 # --- FUNGSI GENERATE PDF ---
 def render_to_pdf(template_src, context_dict={}):
