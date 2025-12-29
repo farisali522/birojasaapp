@@ -72,12 +72,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -157,7 +160,7 @@ JAZZMIN_SETTINGS = {
     # Opsi: Pilih Dark Mode atau Light Mode
     "show_sidebar": True,
     "navigation_expanded": True,
-    "theme": "darkly",
+    "theme": "cyborg",
 }
 # Firebase Frontend Config
 FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
