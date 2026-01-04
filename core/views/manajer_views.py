@@ -10,8 +10,12 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
 
+# Firebase Imports
+import firebase_admin
+from firebase_admin import credentials, auth
+
 # Import Models
-from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, MasterDokumen, LayananDokumen
+from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, MasterDokumen, LayananDokumen, AktivitasLogin
 
 # Import Helpers
 from ..utils import render_to_pdf
@@ -52,6 +56,11 @@ def manajer_dashboard_view(request):
     # Statistik Status Permohonan (untuk tabel di Tab Monitoring)
     status_stats = Permohonan.objects.values('status_proses').annotate(jumlah=Count('id')).order_by('-jumlah')
     
+    # --- FITUR MONITORING LOGIN (Peningkatan dengan IP) ---
+    # 1. Staff Terkini Login
+    staff_emails = Karyawan.objects.values_list('email', flat=True)
+    recent_staff_logins = AktivitasLogin.objects.filter(user__email__in=staff_emails).order_by('-timestamp')[:10]
+    
     # Ambil data karyawan untuk ucapan selamat datang
     karyawan = Karyawan.objects.get(email=request.user.email)
 
@@ -60,7 +69,8 @@ def manajer_dashboard_view(request):
         'total_pelanggan': total_pelanggan,
         'total_permohonan': total_permohonan,
         'total_uang': total_uang,
-        'status_stats': status_stats
+        'status_stats': status_stats,
+        'recent_staff_logins': recent_staff_logins,
     }
     return render(request, 'core/manajer/manajer_dashboard.html', context)
 
@@ -286,14 +296,7 @@ def manajer_karyawan_edit_view(request, karyawan_id):
 @login_required(login_url='login')
 @user_passes_test(manajer_check, login_url='dashboard')
 def manajer_karyawan_delete_view(request, karyawan_id):
-    karyawan = get_object_or_404(Karyawan, id=karyawan_id)
-    try:
-        user = User.objects.get(email=karyawan.email)
-        user.delete()
-    except:
-        pass
-    karyawan.delete()
-    messages.success(request, "Karyawan dihapus.")
+    messages.error(request, "Penghapusan karyawan tidak diperbolehkan. Silakan hubungi Administrator Sistem.")
     return redirect('manajer_karyawan_list')
 
 # ==========================================

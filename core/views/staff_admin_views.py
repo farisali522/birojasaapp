@@ -19,7 +19,7 @@ from ..utils import kirim_notifikasi_email, render_to_pdf
 def staff_dashboard_view(request):
     # Security Check
     if not Karyawan.objects.filter(email=request.user.email).exists():
-        messages.error(request, "⛔ Akses Ditolak.")
+        messages.error(request, "Akses Ditolak.")
         return redirect('dashboard')
     
     # 1. Menunggu Verifikasi (Baru Masuk)

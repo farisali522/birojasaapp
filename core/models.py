@@ -264,3 +264,31 @@ class PembayaranAuditLog(models.Model):
     def __str__(self):
         karyawan_name = self.karyawan.nama if self.karyawan else 'System'
         return f"{self.pembayaran.nomor_invoice} - {self.get_action_display()} by {karyawan_name}"
+
+# ==========================================
+# 5. MONITORING AKTIVITAS
+# ==========================================
+
+class AktivitasLogin(models.Model):
+    """
+    Mencatat histori login user beserta alamat IP dan Device (User Agent).
+    """
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='login_activities')
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Aktivitas Login'
+        verbose_name_plural = 'Aktivitas Login'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.ip_address} pada {self.timestamp}"
+
+    @property
+    def get_staff_name(self):
+        try:
+            return Karyawan.objects.get(email=self.user.email).nama
+        except Karyawan.DoesNotExist:
+            return self.user.username

@@ -148,13 +148,6 @@
                                         class="btn btn-sm btn-outline-secondary border-0" title="Edit Profil">
                                         <i class="bi bi-pencil-square fs-5"></i>
                                     </a>
-                                    {% if k.email != request.user.email %}
-                                    <a href="{% url 'manajer_karyawan_delete' k.id %}"
-                                        class="btn btn-sm btn-outline-danger border-0" title="Hapus Akun"
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus akun {{ k.nama }}?')">
-                                        <i class="bi bi-trash fs-5"></i>
-                                    </a>
-                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

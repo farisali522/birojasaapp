@@ -192,6 +192,10 @@
             type="button" role="tab">
             <i class="bi bi-shield-lock"></i> <span>Akses Admin</span>
         </button>
+        <button class="custom-nav-link" id="pills-login-tab" data-bs-toggle="pill" data-bs-target="#pills-login"
+            type="button" role="tab">
+            <i class="bi bi-clock-history"></i> <span>Aktivitas Login</span>
+        </button>
     </div>
 
     <div class="tab-content" id="managerDashboardTabsContent">
@@ -254,6 +258,54 @@
                             satu matriks.</p>
                         <a href="{% url 'master_layanan_list' %}"
                             class="btn btn-sm btn-outline-primary px-3 rounded-pill">Kelola ➔</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AKTIVITAS LOGIN -->
+        <div class="tab-pane fade" id="pills-login" role="tabpanel">
+            <div class="row g-4 justify-content-center">
+                <!-- Login Staff -->
+                <div class="col-md-10">
+                    <div class="card card-master">
+                        <div class="card-header bg-white py-3 px-4 border-0">
+                            <h6 class="fw-bold text-dark mb-0"><i
+                                    class="bi bi-person-workspace me-2 text-primary"></i>Login Staff Terkini</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-master table-hover mb-0 align-middle"
+                                    style="font-size: 0.85rem;">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Staff</th>
+                                            <th class="text-end pe-4">Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in recent_staff_logins %}
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-bold">{{ log.get_staff_name }}</div>
+                                                <div class="small text-muted">
+                                                    {{ log.user.username }} •
+                                                    {{ log.ip_address|default:"IP Tersembunyi"}}</div>
+                                            </td>
+                                            <td class="text-end pe-4 text-primary fw-bold">
+                                                {{ log.timestamp|timesince }} yang lalu
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="2" class="text-center py-4 text-muted small">Belum ada data.
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
