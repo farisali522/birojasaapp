@@ -1,79 +1,230 @@
 {% extends 'core/shared/base.html' %}
 {% load rupiah_filters %}
-{% block title %}Formulir Pengajuan{% endblock %}
+{% block title %}Lengkapi Berkas - {{ layanan.nama_layanan }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<style>
+    .application-form {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06) !important;
+        overflow: hidden;
+    }
+
+    .form-section-header {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        color: var(--primary-green);
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .service-summary {
+        background: linear-gradient(135deg, rgba(6, 78, 59, 0.03) 0%, rgba(251, 191, 36, 0.03) 100%);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid rgba(6, 78, 59, 0.05);
+        margin-bottom: 35px;
+    }
+
+    .doc-upload-row {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.2s;
+    }
+
+    .doc-upload-row:focus-within {
+        background: #fff;
+        border-color: var(--primary-green);
+        box-shadow: 0 4px 12px rgba(6, 78, 59, 0.05);
+    }
+
+    .doc-icon-box {
+        width: 44px;
+        height: 44px;
+        background: var(--primary-green);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 12px;
+        font-family: 'Montserrat';
+        font-size: 0.95rem;
+    }
+
+    .btn-submit {
+        padding: 18px;
+        font-size: 1.1rem;
+        border-radius: 16px !important;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 25px rgba(6, 78, 59, 0.2);
+    }
+</style>
+
+<div class="container py-5 application-form">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            
-            <div class="text-center mb-4">
-                <span class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill">Langkah 2 dari 2</span>
-                <h2 class="fw-bold" style="color: var(--primary-green);">Lengkapi Berkas</h2>
-                <p class="text-muted">Anda memilih layanan <strong>{{ layanan.nama_layanan }}</strong></p>
+
+            <!-- HEADER -->
+            <div class="text-center mb-5">
+                <span class="badge bg-primary-custom text-white px-4 py-2 rounded-pill mb-3 fw-bold shadow-sm"
+                    style="letter-spacing: 1px; font-size: 0.75rem;">
+                    PENGAJUAN BARU
+                </span>
+                <h1 class="fw-800" style="font-family: 'Montserrat'; letter-spacing: -2px;">Lengkapi Berkas Persyaratan
+                </h1>
+                <p class="text-muted fs-5">Langkah terakhir untuk memulai proses pengurusan dokumen Anda.</p>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-5">
-                    
+            <!-- SERVICE SUMMARY -->
+            <div class="service-summary d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Layanan
+                        Terpilih</div>
+                    <h4 class="fw-bold mb-0" style="color: var(--primary-green); font-family: 'Montserrat';">
+                        {{ layanan.nama_layanan }}</h4>
+                </div>
+                <div class="text-end">
+                    <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Biaya
+                        Estimasi</div>
+                    <div class="badge bg-white shadow-sm text-primary-custom border px-3 py-2 fs-5 fw-800">
+                        {{ layanan.harga_jasa|rupiah }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-master">
+                <div class="card-body p-4 p-md-5">
+
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
-                        <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color: var(--text-dark);">
-                            1. Upload Dokumen Persyaratan
-                        </h5>
-                        
+
+                        <!-- SECTION 1: DOKUMEN -->
+                        <div class="form-section-header">
+                            <i class="bi bi-cloud-arrow-up-fill fs-3"></i>
+                            <span>1. UNGGAH DOKUMEN FISIK</span>
+                        </div>
+
                         {% for syarat in syarat_dokumen %}
-                        <div class="mb-4">
-                            <label class="form-label d-flex justify-content-between">
-                                <span>
-                                    {{ forloop.counter }}. {{ syarat.master_dokumen.nama_dokumen }}
-                                    {% if syarat.is_wajib %}<span class="text-danger">*</span>{% endif %}
-                                </span>
-                                <span class="badge bg-light text-secondary border">Wajib Upload</span>
-                            </label>
-                            
-                            <div class="input-group">
-                                <input type="file" name="file_{{ syarat.master_dokumen.id }}" class="form-control" 
-                                       {% if syarat.is_wajib %}required{% endif %}>
+                        <div class="doc-upload-row">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="doc-icon-box">{{ forloop.counter }}</div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0 fw-bold text-dark">{{ syarat.master_dokumen.nama_dokumen }}</h6>
+                                    <small class="text-muted">
+                                        {{ syarat.master_dokumen.deskripsi|default:"Mohon upload scan dokumen asli." }}
+                                    </small>
+                                </div>
+                                {% if syarat.is_wajib %}
+                                <span
+                                    class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3">WAJIB</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3">OPSIONAL</span>
+                                {% endif %}
                             </div>
-                            <div class="form-text text-muted ms-1 mt-1">
-                                <small>{{ syarat.master_dokumen.deskripsi }}</small>
-                            </div>
+
+                            {% if syarat.is_wajib %}
+                            <input type="file" name="file_{{ syarat.master_dokumen.id }}"
+                                class="form-control form-control-lg border-0 bg-white shadow-none"
+                                style="border-radius: 12px; font-size: 0.9rem;" required>
+                            {% else %}
+                            <input type="file" name="file_{{ syarat.master_dokumen.id }}"
+                                class="form-control form-control-lg border-0 bg-white shadow-none"
+                                style="border-radius: 12px; font-size: 0.9rem;">
+                            {% endif %}
                         </div>
                         {% endfor %}
 
-                        <h5 class="fw-bold mb-4 pb-2 border-bottom mt-5" style="color: var(--text-dark);">
-                            2. Opsi Pengiriman
-                        </h5>
-
-                        <div class="form-floating mb-3">
-                            <select name="metode_pengiriman" class="form-select" id="metodeSelect" required>
-                                <option value="" selected disabled>Pilih opsi...</option>
-                                <option value="Ambil di Kantor">🏢 Saya akan ambil sendiri di kantor</option>
-                                <option value="Kirim Kurir">🚚 Kirim ke alamat saya (via Kurir)</option>
-                            </select>
-                            <label for="metodeSelect">Bagaimana dokumen diambil?</label>
+                        <!-- SECTION 2: PENGIRIMAN -->
+                        <div class="form-section-header mt-5">
+                            <i class="bi bi-truck-front-fill fs-3"></i>
+                            <span>2. METODE SERAH TERIMA</span>
                         </div>
 
-                        <div class="form-floating mb-4">
-                            <textarea name="catatan" class="form-control" placeholder="Tulis catatan" id="catatanText" style="height: 100px"></textarea>
-                            <label for="catatanText">Catatan Tambahan (Opsional)</label>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-12">
+                                <label class="form-label-custom">Bagaimana kami menerima berkas Anda?</label>
+                                <select name="metode_pengiriman" class="form-select form-select-lg"
+                                    style="border-radius: 14px; padding: 14px;" required>
+                                    <option value="" selected disabled>Pilih metode pengambilan...</option>
+                                    <option value="Ambil di Kantor">🏢 Saya akan datang langsung ke kantor (Gratis)
+                                    </option>
+                                    <option value="Kirim Kurir">🚚 Layanan Antar-Jemput Kurir (Lebih Praktis)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label-custom">Catatan Tambahan (Opsional)</label>
+                                <textarea name="catatan" class="form-control"
+                                    placeholder="Tuliskan catatan khusus atau instruksi tambahan..."
+                                    style="height: 120px; border-radius: 14px; padding: 16px;"></textarea>
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn btn-primary-custom btn-lg py-3 shadow-sm">
-                                Kirim Permohonan 🚀
+                        <!-- SUBMIT -->
+                        <div class="mt-5">
+                            <button type="submit" class="btn btn-primary-custom w-100 btn-submit mb-3">
+                                KIRIM PERMOHONAN SEKARANG <i class="bi bi-arrow-right-circle ms-2"></i>
                             </button>
-                            <a href="{% url 'pilih_layanan' %}" class="btn btn-link text-muted text-decoration-none">
-                                Batal, pilih layanan lain
-                            </a>
+                            <div class="text-center">
+                                <a href="{% url 'pilih_layanan' %}"
+                                    class="text-decoration-none text-muted small fw-bold">
+                                    <i class="bi bi-chevron-left me-1"></i> Kembali ke daftar layanan
+                                </a>
+                            </div>
                         </div>
                     </form>
 
                 </div>
             </div>
-            
+
+            <!-- TRUST BADGES -->
+            <div class="row mt-5 text-center g-4">
+                <div class="col-4">
+                    <i class="bi bi-shield-check text-success fs-4 mb-2"></i>
+                    <div class="small fw-bold text-muted">Aman & Terenkripsi</div>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-clock-history text-primary-custom fs-4 mb-2"></i>
+                    <div class="small fw-bold text-muted">Proses Real-time</div>
+                </div>
+                <div class="col-4">
+                    <i class="bi bi-headset text-warning fs-4 mb-2"></i>
+                    <div class="small fw-bold text-muted">Support 24/7</div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

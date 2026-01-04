@@ -12,7 +12,7 @@ class PelangganAdmin(admin.ModelAdmin):
 
 @admin.register(Karyawan)
 class KaryawanAdmin(admin.ModelAdmin):
-    list_display = ('kode_karyawan', 'nama', 'role', 'email')
+    list_display = ('kode_karyawan', 'nama', 'role', 'email',)
     list_filter = ('role',)
 
 @admin.register(Layanan)

@@ -57,8 +57,8 @@
                             </div>
                         </div>
                         <h5 class="card-title fw-bold mb-3">{{ layanan.nama_layanan }}</h5>
-                        <p class="text-muted small mb-4"><i class="bi bi-clock me-1"></i> {{
-                            layanan.estimasi_waktu|default:"Proses Cepat" }}</p>
+                        <p class="text-muted small mb-4"><i class="bi bi-clock me-1"></i>
+                            {{ layanan.estimasi_waktu|default:"Proses Cepat" }}</p>
 
                         <h3 class="fw-bold mb-1" style="color: var(--text-dark);">
                             {{ layanan.harga_jasa|rupiah }}

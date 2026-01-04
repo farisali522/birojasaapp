@@ -1,124 +1,273 @@
 {% extends 'core/shared/base.html' %}
 
-{% block title %}Dashboard Pelanggan{% endblock %}
+{% block title %}Dashboard Saya - BiroJasaApp{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<style>
+    .customer-dashboard {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+        background: #fff;
+    }
+
+    .profile-sidebar {
+        border-top: 5px solid var(--primary-green);
+    }
+
+    .avatar-circle {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, var(--primary-green) 0%, #065f46 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 15px rgba(6, 78, 59, 0.15);
+        font-family: 'Montserrat';
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #edf2f7;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .welcome-card {
+        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+        color: white;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-card::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .table-master thead th {
+        background: #f8fafc;
+        font-family: 'Montserrat';
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        padding: 16px;
+        border: none;
+    }
+
+    .table-master tbody td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .status-badge {
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 6px 14px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
+
+<div class="container py-5 customer-dashboard">
     <div class="row g-4">
-        
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <div style="width: 80px; height: 80px; background-color: #2F4F4F; color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">
-                            {{ request.user.username|make_list|first|upper }}
+
+        <!-- SIDEBAR: PROFILE -->
+        <div class="col-lg-4">
+            <div class="card card-master profile-sidebar">
+                <div class="card-body p-4 text-center">
+                    <div class="avatar-circle">
+                        {{ request.user.username|make_list|first|upper }}
+                    </div>
+
+                    <h5 class="fw-800 mb-1" style="font-family: 'Montserrat';">
+                        {{ pelanggan.nama|default:request.user.username }}</h5>
+                    <div class="badge bg-gold bg-opacity-10 text-gold rounded-pill px-3 py-1 fw-bold small mb-4">
+                        {{ pelanggan.kode_pelanggan|default:"MEMBER" }}
+                    </div>
+
+                    <div class="text-start">
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ request.user.email }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">WhatsApp</div>
+                            <div class="info-value">
+                                <a href="https://wa.me/{{ pelanggan.no_whatsapp }}" target="_blank"
+                                    class="text-decoration-none text-success fw-bold">
+                                    <i class="bi bi-whatsapp me-1"></i> {{ pelanggan.no_whatsapp|default:"-" }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Alamat Lengkap</div>
+                            <div class="info-value">{{ pelanggan.alamat_lengkap|default:"Alamat belum diatur" }}</div>
                         </div>
                     </div>
-                    
-                    <h5 class="fw-bold">{{ pelanggan.nama|default:request.user.username }}</h5>
-                    <p class="text-muted small mb-3">{{ pelanggan.kode_pelanggan|default:"-" }}</p>
-                    
-                    <hr>
-                    
-                    <div class="text-start">
-                        <p class="mb-2">
-                            <small class="text-muted d-block">Email:</small>
-                            {{ request.user.email }}
-                        </p>
-                        <p class="mb-2">
-                            <small class="text-muted d-block">WhatsApp:</small>
-                            {{ pelanggan.no_whatsapp|default:"-" }}
-                        </p>
-                        <p class="mb-0">
-                            <small class="text-muted d-block">Alamat:</small>
-                            {{ pelanggan.alamat_lengkap|default:"-" }}
-                        </p>
-                    </div>
-                    
+
                     <div class="d-grid mt-4">
-                        <a href="{% url 'edit_profil' %}" class="btn btn-outline-dark btn-sm">Edit Profil</a>
+                        <a href="{% url 'edit_profil' %}" class="btn btn-light rounded-pill fw-bold border py-2">
+                            <i class="bi bi-person-gear me-1"></i> PENGATURAN PROFIL
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            
-            <div class="card shadow-sm border-0 mb-4 bg-white">
-                <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="fw-bold text-dark mb-1">Halo, Selamat Datang!</h4>
-                        <p class="text-muted mb-0">Mau mengurus dokumen apa hari ini?</p>
+        <!-- MAIN CONTENT -->
+        <div class="col-lg-8">
+
+            <!-- WELCOME BANNER -->
+            <div class="card welcome-card border-0 mb-4 p-4 shadow-lg">
+                <div class="card-body d-md-flex justify-content-between align-items-center position-relative">
+                    <div class="mb-3 mb-md-0">
+                        <h3 class="fw-800 mb-1" style="font-family: 'Montserrat';">Halo, {{ request.user.username }}!
+                        </h3>
+                        <p class="mb-0 text-white-50">Lacak pengajuan dokumen Anda secara transparan & real-time.</p>
                     </div>
-                    <a href="{% url 'pilih_layanan' %}" class="btn btn-success btn-lg shadow-sm" style="background-color: #2F4F4F; border-color: #2F4F4F;">
-                        + Ajukan Baru
+                    <a href="{% url 'pilih_layanan' %}"
+                        class="btn btn-gold btn-lg rounded-pill px-4 fw-800 shadow-sm border-0">
+                        <i class="bi bi-plus-lg me-1"></i> AJUKAN BARU
                     </a>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h5 class="mb-0 fw-bold text-secondary">Riwayat Permohonan</h5>
+            <!-- PERMOHONAN LIST -->
+            <div class="card card-master overflow-hidden">
+                <div class="card-header bg-white py-4 px-4 border-0 d-flex align-items-center">
+                    <div class="bg-primary-custom bg-opacity-10 text-primary-custom rounded-3 p-2 me-3">
+                        <i class="bi bi-layers-fill fs-4"></i>
+                    </div>
+                    <h5 class="mb-0 fw-800 text-dark" style="font-family: 'Montserrat';">Riwayat Pengajuan</h5>
                 </div>
+
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0 align-middle">
-                            <thead class="table-light">
+                        <table class="table table-master mb-0">
+                            <thead>
                                 <tr>
-                                    <th class="ps-4">Kode</th>
+                                    <th class="ps-4">No. Pengajuan</th>
                                     <th>Layanan</th>
                                     <th>Tanggal</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th>Status Proses</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in permohonan_list %}
                                 <tr>
-                                    <td class="ps-4 fw-bold text-primary small">{{ item.kode_permohonan }}</td>
-                                    <td>{{ item.layanan.nama_layanan }}</td>
-                                    <td>{{ item.created_at|date:"d M Y" }}</td>
-                                    
+                                    <td class="ps-4">
+                                        <span class="text-primary-custom fw-bold small">{{ item.kode_permohonan
+                                            }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ item.layanan.nama_layanan }}</div>
+                                        <div class="text-muted small">
+                                            {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                                            <i class="bi bi-truck me-1"></i> Kurir
+                                            {% else %}
+                                            <i class="bi bi-building me-1"></i> Ambil Kantor
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fw-500">{{ item.created_at|date:"d M Y" }}</td>
+
                                     <td>
                                         {% if item.status_proses == 'Selesai' %}
-                                            <span class="badge bg-success">Selesai</span>
-                                            
-                                            <div class="small mt-1 text-muted" style="font-size: 0.75rem;">
-                                                {% if item.metode_pengiriman == 'Kirim Kurir' %}
-                                                    🚚 Dikirim Kurir
-                                                {% else %}
-                                                    🏢 Ambil di Kantor
-                                                {% endif %}
-                                            </div>
-
+                                        <span class="status-badge bg-success bg-opacity-10 text-success">
+                                            <i class="bi bi-check-circle-fill"></i> SELESAI
+                                        </span>
                                         {% elif item.status_proses == 'Ditolak' %}
-                                            <span class="badge bg-danger">Ditolak</span>
-                                        
+                                        <span class="status-badge bg-danger bg-opacity-10 text-danger">
+                                            <i class="bi bi-x-circle-fill"></i> DITOLAK
+                                        </span>
                                         {% elif item.status_proses == 'Menunggu Pembayaran' %}
-                                            <span class="badge bg-warning text-dark">Menunggu Bayar</span>
-                                        
+                                        <span class="status-badge bg-warning bg-opacity-10 text-dark">
+                                            <i class="bi bi-credit-card-fill"></i> BUTUH BAYAR
+                                        </span>
                                         {% else %}
-                                            <span class="badge bg-info text-dark">{{ item.status_proses }}</span>
+                                        <span class="status-badge bg-info bg-opacity-10 text-primary">
+                                            <i class="bi bi-hourglass-split"></i> {{ item.status_proses|upper }}
+                                        </span>
                                         {% endif %}
                                     </td>
-                                    
-                                    <td>
+
+                                    <td class="text-center">
                                         {% if item.status_proses == 'Menunggu Pembayaran' %}
-                                            <a href="{% url 'tagihan' item.id %}" class="btn btn-sm btn-warning fw-bold shadow-sm">
-                                                💳 Bayar
-                                            </a>
+                                        <a href="{% url 'tagihan' item.id %}"
+                                            class="btn btn-warning btn-sm rounded-pill fw-bold px-3 shadow-sm">
+                                            BAYAR
+                                        </a>
                                         {% else %}
-                                            <a href="{% url 'detail_permohonan' item.id %}" class="btn btn-sm btn-outline-secondary">
-                                                Detail
-                                            </a>
+                                        <a href="{% url 'detail_permohonan' item.id %}"
+                                            class="btn btn-light btn-sm rounded-pill fw-bold px-3 border shadow-sm text-muted">
+                                            DETAIL
+                                        </a>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">
-                                        <div class="display-1 mb-3">📂</div>
-                                        <p class="mb-2">Belum ada permohonan yang diajukan.</p>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="mb-4">
+                                            <i class="bi bi-folder2-open display-2 text-muted opacity-25"></i>
+                                        </div>
+                                        <h5 class="fw-bold text-muted" style="font-family: 'Montserrat';">Belum Ada
+                                            Pengajuan</h5>
+                                        <p class="text-muted">Klik tombol "Ajukan Baru" untuk mulai urus dokumen Anda.
+                                        </p>
                                     </td>
                                 </tr>
                                 {% endfor %}

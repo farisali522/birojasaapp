@@ -1,37 +1,143 @@
 {% extends 'core/shared/base.html' %}
-{% block title %}Edit Profil{% endblock %}
+{% block title %}Edit Profil - BiroJasaApp{% endblock %}
+
 {% block content %}
-<div class="container py-5">
+<style>
+    .profile-page {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06) !important;
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-green) 0%, #022c22 100%);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+    }
+
+    .avatar-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .form-label-custom {
+        font-weight: 700;
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .form-control-modern {
+        border-radius: 14px !important;
+        padding: 14px 18px !important;
+        border: 2px solid #e2e8f0 !important;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .form-control-modern:focus {
+        border-color: var(--primary-green) !important;
+        box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.1) !important;
+    }
+
+    .form-control-modern:disabled {
+        background-color: #f8fafc;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="container py-5 profile-page">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white fw-bold">Edit Profil Saya</div>
-                <div class="card-body p-4">
+        <div class="col-lg-6">
+            <div class="card card-master">
+                <div class="profile-header">
+                    <div class="avatar-icon">
+                        <i class="bi bi-person-fill fs-1"></i>
+                    </div>
+                    <h4 class="fw-800 mb-1" style="font-family: 'Montserrat';">Edit Profil Saya</h4>
+                    <p class="text-white-50 small mb-0">Perbarui informasi akun Anda di sini.</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
                     <form method="POST">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label>Kode Pelanggan</label>
-                            <input type="text" class="form-control" value="{{ pelanggan.kode_pelanggan }}" disabled>
+
+                        <!-- READ-ONLY FIELDS -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Kode Pelanggan</label>
+                                <input type="text" class="form-control form-control-modern"
+                                    value="{{ pelanggan.kode_pelanggan }}" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Email (Login)</label>
+                                <input type="text" class="form-control form-control-modern"
+                                    value="{{ pelanggan.email }}" disabled>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label>Email (Login)</label>
-                            <input type="text" class="form-control" value="{{ pelanggan.email }}" disabled>
+
+                        <hr class="my-4">
+
+                        <!-- EDITABLE FIELDS -->
+                        <div class="mb-4">
+                            <label class="form-label-custom">Nama Lengkap</label>
+                            <input type="text" name="nama" class="form-control form-control-modern"
+                                value="{{ pelanggan.nama }}" placeholder="Masukkan nama lengkap Anda" required>
                         </div>
-                        <div class="mb-3">
-                            <label>Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-control" value="{{ pelanggan.nama }}" required>
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">
+                                <i class="bi bi-whatsapp text-success me-1"></i> No. WhatsApp
+                            </label>
+                            <input type="tel" name="no_wa" class="form-control form-control-modern"
+                                value="{{ pelanggan.no_whatsapp }}" placeholder="Contoh: 08123456789" required>
                         </div>
-                        <div class="mb-3">
-                            <label>No. WhatsApp</label>
-                            <input type="number" name="no_wa" class="form-control" value="{{ pelanggan.no_whatsapp }}" required>
+
+                        <div class="mb-4">
+                            <label class="form-label-custom">
+                                <i class="bi bi-geo-alt me-1"></i> Alamat Lengkap (Untuk Pengiriman)
+                            </label>
+                            <textarea name="alamat" class="form-control form-control-modern" rows="4"
+                                placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan, Kota, Kode Pos">{{ pelanggan.alamat_lengkap|default:'' }}</textarea>
                         </div>
-                        <div class="mb-3">
-                            <label>Alamat Lengkap (Untuk Pengiriman)</label>
-                            <textarea name="alamat" class="form-control" rows="3">{{ pelanggan.alamat_lengkap|default:'' }}</textarea>
-                        </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary-custom">Simpan Perubahan</button>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+
+                        <!-- ACTIONS -->
+                        <div class="d-grid gap-3 pt-3">
+                            <button type="submit"
+                                class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-800 shadow-lg">
+                                <i class="bi bi-check-lg me-2"></i> SIMPAN PERUBAHAN
+                            </button>
+                            <a href="{% url 'dashboard' %}"
+                                class="btn btn-light btn-lg py-3 rounded-pill fw-bold border text-muted">
+                                <i class="bi bi-x-lg me-2"></i> BATAL
+                            </a>
                         </div>
                     </form>
                 </div>

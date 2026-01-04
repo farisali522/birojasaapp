@@ -1,22 +1,144 @@
 {% extends 'core/shared/base.html' %}
-{% block title %}Pilih Layanan{% endblock %}
+{% load rupiah_filters %}
+{% block title %}Pilih Layanan - BiroJasaApp{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <h3 class="text-center fw-bold mb-4">Pilih Layanan yang Anda Butuhkan</h3>
+<style>
+    .service-selection {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .card-master:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(6, 78, 59, 0.1) !important;
+    }
+
+    .service-icon-box {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--primary-green) 0%, #065f46 100%);
+        color: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        box-shadow: 0 10px 20px rgba(6, 78, 59, 0.2);
+    }
+
+    .price-tag {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        color: var(--primary-green);
+        font-size: 1.4rem;
+        letter-spacing: -0.5px;
+    }
+
+    .btn-select {
+        border-radius: 14px !important;
+        padding: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+</style>
+
+<div class="container py-5 service-selection">
+    <!-- HEADER -->
+    <div class="text-center mb-5">
+        <span class="badge bg-gold text-dark px-3 py-2 rounded-pill mb-3 fw-bold shadow-sm" style="font-size: 0.75rem;">
+            LANGKAH 1 DARI 2
+        </span>
+        <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -2px;">Pilih Layanan Kebutuhan Anda
+        </h1>
+        <p class="text-muted fs-5">Kami menyediakan berbagai solusi pengurusan dokumen secara cepat & aman.</p>
+    </div>
+
+    <!-- SERVICES GRID -->
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for item in layanan_list %}
         <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="card-title fw-bold">{{ item.nama_layanan }}</h5>
-                    <p class="text-muted">Estimasi: {{ item.estimasi_waktu }}</p>
-                    {% load rupiah_filters %} <h4 class="text-primary">
-       {{ item.harga_jasa|rupiah }} </h4>
-                    <a href="{% url 'form_pengajuan' item.id %}" class="btn btn-outline-primary mt-3 w-100">Pilih Ini</a>
+            <div class="card h-100 card-master text-center p-4">
+                <div class="card-body d-flex flex-column">
+                    <div class="service-icon-box">
+                        <i class="bi bi-file-earmark-check fs-1"></i>
+                    </div>
+
+                    <h4 class="fw-bold mb-2" style="color: #1e293b; font-family: 'Montserrat';">{{ item.nama_layanan }}
+                    </h4>
+
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+                        <span class="badge bg-light text-muted border px-2 py-1 rounded">
+                            <i class="bi bi-clock me-1"></i> {{ item.estimasi_waktu }}
+                        </span>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="text-muted small mb-1 fw-bold">BIAYA JASA</div>
+                        <div class="price-tag mb-4">{{ item.harga_jasa|rupiah }}</div>
+
+                        <a href="{% url 'form_pengajuan' item.id %}"
+                            class="btn btn-primary-custom w-100 btn-select shadow-sm">
+                            PILIH LAYANAN <i class="bi bi-arrow-right-short ms-1"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-search display-1 text-muted opacity-25"></i>
+            <h4 class="mt-3 text-muted">Maaf, saat ini belum ada layanan yang tersedia.</h4>
+        </div>
         {% endfor %}
+    </div>
+
+    <!-- FOOTER TIPS -->
+    <div class="mt-5 pt-5 border-top">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="bg-primary-custom bg-opacity-10 p-3 rounded-4 d-flex align-items-center justify-content-center"
+                        style="width: 54px; height: 54px;">
+                        <i class="bi bi-info-circle fs-3 text-primary-custom"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Butuh Bantuan?</h6>
+                        <p class="text-muted small mb-0">Jika Anda tidak menemukan layanan yang sesuai, silakan hubungi
+                            tim support kami melalui WhatsApp untuk konsultasi gratis.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="https://wa.me/628123456789" target="_blank"
+                    class="btn btn-outline-success rounded-pill px-4 fw-bold">
+                    <i class="bi bi-whatsapp me-2"></i> Hubungi CS (WhatsApp)
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

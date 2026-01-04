@@ -1,135 +1,237 @@
 {% extends 'core/shared/base.html' %}
 {% load static %}
+{% load rupiah_filters %}
 
-{% block title %}Cetak Laporan Gabungan{% endblock %}
+{% block title %}Cetak Laporan - BiroJasaApp{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h4><i class="bi bi-file-earmark-pdf"></i> Cetak Laporan Operasional & Keuangan</h4>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{% url 'cetak_laporan_gabungan' %}" class="mb-4">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Pilih Periode:</label>
-                        <select name="periode" id="periodeSelect" class="form-select">
-                            <option value="harian">Harian (Hari Ini)</option>
-                            <option value="mingguan">Mingguan (Minggu Ini)</option>
-                            <option value="bulanan">Bulanan (Bulan Ini)</option>
-                            <option value="tahunan">Tahunan (Tahun Ini)</option>
-                            <option value="custom">Custom (Pilih Tanggal)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3" id="customDateStart" style="display: none;">
-                        <label class="form-label">Dari Tanggal:</label>
-                        <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="form-control">
-                    </div>
-                    <div class="col-md-3" id="customDateEnd" style="display: none;">
-                        <label class="form-label">Sampai Tanggal:</label>
-                        <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="form-control">
-                    </div>
-                    <div class="col-md-2 align-self-end">
-                        <button type="submit" class="btn btn-info w-100">
-                            <i class="bi bi-search"></i> Preview
-                        </button>
-                    </div>
-                </div>
-            </form>
+<style>
+    .report-page {
+        animation: fadeIn 0.6s ease-out;
+    }
 
-            <hr>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+        background: #fff;
+    }
+
+    .report-card {
+        border-radius: 16px !important;
+        overflow: hidden;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .report-card .card-header {
+        padding: 20px;
+        font-family: 'Montserrat';
+    }
+
+    .report-card .card-header h5 {
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .filter-section {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .btn-print {
+        padding: 14px 35px;
+        border-radius: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="container py-5 report-page">
+    <!-- HEADER -->
+    <div class="text-center mb-5">
+        <span class="badge bg-primary-custom text-white px-3 py-2 rounded-pill mb-3 fw-bold shadow-sm"
+            style="font-size: 0.75rem;">
+            REPORT CENTER
+        </span>
+        <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -2px;">Cetak Laporan Gabungan</h1>
+        <p class="text-muted fs-5">Laporan Operasional & Keuangan dalam satu dokumen terintegrasi.</p>
+    </div>
+
+    <!-- FILTER SECTION -->
+    <div class="card card-master mb-4">
+        <div class="card-body p-4">
+            <div class="filter-section">
+                <form method="GET" action="{% url 'cetak_laporan_gabungan' %}">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-lg-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase"
+                                style="letter-spacing: 0.5px;">Pilih Periode</label>
+                            <select name="periode" id="periodeSelect" class="form-select form-select-lg"
+                                style="border-radius: 12px;">
+                                <option value="harian">Harian (Hari Ini)</option>
+                                <option value="mingguan">Mingguan (Minggu Ini)</option>
+                                <option value="bulanan">Bulanan (Bulan Ini)</option>
+                                <option value="tahunan">Tahunan (Tahun Ini)</option>
+                                <option value="custom">Custom (Pilih Tanggal)</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3" id="customDateStart" style="display: none;">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Dari Tanggal</label>
+                            <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}"
+                                class="form-control form-control-lg" style="border-radius: 12px;">
+                        </div>
+                        <div class="col-lg-3" id="customDateEnd" style="display: none;">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Sampai Tanggal</label>
+                            <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}"
+                                class="form-control form-control-lg" style="border-radius: 12px;">
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="submit" class="btn btn-primary-custom btn-lg w-100 py-3"
+                                style="border-radius: 12px;">
+                                <i class="bi bi-search me-1"></i> Preview
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
             {% if label_periode %}
-            <div class="alert alert-info"><strong>Periode:</strong> {{ label_periode }}</div>
+            <div class="alert alert-info bg-primary-custom bg-opacity-10 text-primary-custom border-0 rounded-3 d-flex align-items-center mb-4"
+                role="alert">
+                <i class="bi bi-calendar-check fs-4 me-3"></i>
+                <div>
+                    <strong>Periode Laporan:</strong> {{ label_periode }}
+                </div>
+            </div>
 
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h5><i class="bi bi-graph-up"></i> Laporan Operasional</h5>
+            <div class="row g-4 mb-5">
+                <!-- OPERATIONAL REPORT -->
+                <div class="col-lg-6">
+                    <div class="card report-card h-100">
+                        <div class="card-header"
+                            style="background: linear-gradient(135deg, var(--primary-green) 0%, #065f46 100%); color: white;">
+                            <h5><i class="bi bi-graph-up-arrow me-2"></i> Laporan Operasional</h5>
                         </div>
-                        <div class="card-body">
-                            <table class="table table-sm">
-                                <tr>
-                                    <td>Total Permohonan</td>
-                                    <td class="text-end"><strong>{{ total_permohonan }}</strong></td>
-                                </tr>
-                                <tr class="table-success">
-                                    <td>Selesai</td>
-                                    <td class="text-end"><strong>{{ permohonan_selesai }}</strong></td>
-                                </tr>
-                                <tr class="table-warning">
-                                    <td>Diproses</td>
-                                    <td class="text-end"><strong>{{ permohonan_diproses }}</strong></td>
-                                </tr>
-                                <tr class="table-danger">
-                                    <td>Ditolak</td>
-                                    <td class="text-end"><strong>{{ permohonan_ditolak }}</strong></td>
-                                </tr>
-                            </table>
-                            <h6 class="mt-3">Top Layanan:</h6>
-                            <ul class="list-group list-group-flush">
-                                {% for stat in layanan_stats|slice:":5" %}
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>{{ stat.layanan__nama_layanan }}</span>
-                                    <span class="badge bg-primary">{{ stat.jumlah }}</span>
-                                </li>
-                                {% empty %}
-                                <li class="list-group-item text-muted">Tidak ada data</li>
-                                {% endfor %}
-                            </ul>
+                        <div class="card-body p-4">
+                            <div class="stat-row">
+                                <span class="text-muted">Total Permohonan</span>
+                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">{{
+                                    total_permohonan }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="d-flex align-items-center"><span
+                                        class="badge bg-success bg-opacity-10 text-success me-2 px-2 py-1 rounded">✓</span>
+                                    Selesai</span>
+                                <span class="fw-bold text-success">{{ permohonan_selesai }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="d-flex align-items-center"><span
+                                        class="badge bg-warning bg-opacity-10 text-dark me-2 px-2 py-1 rounded">⏳</span>
+                                    Diproses</span>
+                                <span class="fw-bold text-warning">{{ permohonan_diproses }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="d-flex align-items-center"><span
+                                        class="badge bg-danger bg-opacity-10 text-danger me-2 px-2 py-1 rounded">✗</span>
+                                    Ditolak</span>
+                                <span class="fw-bold text-danger">{{ permohonan_ditolak }}</span>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-muted fw-bold small text-uppercase mb-3">Top 5 Layanan</h6>
+                            {% for stat in layanan_stats|slice:":5" %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-dark">{{ stat.layanan__nama_layanan }}</span>
+                                <span class="badge bg-primary-custom text-white px-3 py-1 rounded-pill">{{ stat.jumlah
+                                    }}</span>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted small mb-0">Tidak ada data layanan.</p>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="card border-success">
-                        <div class="card-header bg-success text-white">
-                            <h5><i class="bi bi-cash-stack"></i> Laporan Keuangan</h5>
+                <!-- FINANCIAL REPORT -->
+                <div class="col-lg-6">
+                    <div class="card report-card h-100">
+                        <div class="card-header"
+                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                            <h5><i class="bi bi-cash-stack me-2"></i> Laporan Keuangan</h5>
                         </div>
-                        <div class="card-body">
-                            <table class="table table-sm">
-                                <tr>
-                                    <td>Total Transaksi</td>
-                                    <td class="text-end"><strong>{{ total_transaksi }}</strong></td>
-                                </tr>
-                                <tr class="table-success">
-                                    <td>Total Pemasukan</td>
-                                    <td class="text-end"><strong>Rp {{ total_pemasukan|floatformat:0 }}</strong></td>
-                                </tr>
-                            </table>
-                            <h6 class="mt-3">Metode Pembayaran:</h6>
-                            <ul class="list-group list-group-flush">
-                                {% for stat in metode_stats %}
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>{{ stat.metode_pembayaran|default:"Belum Diset" }}</span>
-                                    <span>
-                                        <span class="badge bg-secondary">{{ stat.jumlah }}</span>
-                                        <span class="text-success fw-bold">Rp {{ stat.total|floatformat:0 }}</span>
-                                    </span>
-                                </li>
-                                {% empty %}
-                                <li class="list-group-item text-muted">Tidak ada data</li>
-                                {% endfor %}
-                            </ul>
+                        <div class="card-body p-4">
+                            <div class="stat-row">
+                                <span class="text-muted">Total Transaksi</span>
+                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">{{
+                                    total_transaksi }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="text-muted">Total Pemasukan</span>
+                                <span class="fw-800 fs-4 text-success" style="font-family: 'Montserrat';">Rp {{
+                                    total_pemasukan|floatformat:0 }}</span>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-muted fw-bold small text-uppercase mb-3">Metode Pembayaran</h6>
+                            {% for stat in metode_stats %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                <span class="text-dark fw-500">{{ stat.metode_pembayaran|default:"Belum Diset" }}</span>
+                                <span>
+                                    <span class="badge bg-secondary px-2 py-1 rounded me-2">{{ stat.jumlah }}x</span>
+                                    <span class="text-success fw-bold">Rp {{ stat.total|floatformat:0 }}</span>
+                                </span>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted small mb-0">Tidak ada data transaksi.</p>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="text-center">
+            <!-- ACTIONS -->
+            <div class="text-center pt-4 border-top">
                 <a href="?periode={{ periode }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&print=true"
-                    class="btn btn-danger btn-lg" target="_blank">
-                    <i class="bi bi-file-earmark-pdf"></i> Cetak PDF Gabungan
+                    class="btn btn-danger btn-print shadow-lg me-2" target="_blank">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> CETAK PDF GABUNGAN
                 </a>
-                <a href="{% url 'manajer_dashboard' %}" class="btn btn-secondary btn-lg">
-                    <i class="bi bi-arrow-left"></i> Kembali
+                <a href="{% url 'manajer_dashboard' %}" class="btn btn-light btn-print border shadow-sm">
+                    <i class="bi bi-arrow-left me-2"></i> KEMBALI
                 </a>
             </div>
             {% else %}
-            <div class="alert alert-warning">
-                <i class="bi bi-info-circle"></i> Silakan pilih periode dan klik Preview untuk melihat data laporan.
+            <div class="text-center py-5">
+                <i class="bi bi-file-earmark-bar-graph display-1 text-muted opacity-25 mb-4"></i>
+                <h4 class="fw-bold text-muted" style="font-family: 'Montserrat';">Belum Ada Data Preview</h4>
+                <p class="text-muted">Silakan pilih periode laporan dan klik tombol <strong>Preview</strong> untuk
+                    melihat ringkasan data.</p>
             </div>
             {% endif %}
         </div>
@@ -144,7 +246,6 @@
             periodeSelect.value = periodeValue;
         }
         toggleCustomDate();
-
         periodeSelect.addEventListener('change', toggleCustomDate);
     });
 

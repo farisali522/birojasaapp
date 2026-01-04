@@ -1,69 +1,159 @@
 {% extends 'core/shared/base.html' %}
-{% block title %}Tagihan Pembayaran{% endblock %}
+{% block title %}Tagihan Pembayaran - BiroJasaApp{% endblock %}
 {% load rupiah_filters %}
+
 {% block content %}
-<div class="container py-5">
+<style>
+    .payment-page {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08) !important;
+        overflow: hidden;
+    }
+
+    .invoice-header {
+        background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+        padding: 40px 20px;
+        color: white;
+        text-align: center;
+    }
+
+    .price-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .price-item:last-child {
+        border-bottom: none;
+    }
+
+    .total-box {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 20px;
+        border: 2px solid #edf2f7;
+    }
+
+    .amount {
+        font-family: 'Montserrat';
+        font-weight: 800;
+        color: var(--primary-green);
+    }
+</style>
+
+<div class="container py-5 payment-page">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-dark text-white text-center py-3">
-                    <h5 class="mb-0">TAGIHAN PEMBAYARAN</h5>
-                    <small>{{ pembayaran.nomor_invoice }}</small>
+        <div class="col-lg-6">
+            <div class="card card-master">
+                <div class="invoice-header">
+                    <div class="text-white-50 small fw-bold text-uppercase mb-2" style="letter-spacing: 2px;">Tagihan
+                        Pembayaran</div>
+                    <h2 class="fw-800 mb-2" style="font-family: 'Montserrat';">{{ pembayaran.nomor_invoice }}</h2>
+                    <span class="badge bg-gold text-dark px-3 py-2 rounded-pill fw-bold shadow-sm">
+                        {% if pembayaran.status_pembayaran == 'paid' %}LUNAS{% else %}MENUNGGU PEMBAYARAN{% endif %}
+                    </span>
                 </div>
-                <div class="card-body p-4">
-                    
-                    <div class="mb-4">
-                        <label class="text-muted small">Layanan</label>
-                        <h5 class="fw-bold">{{ permohonan.layanan.nama_layanan }}</h5>
-                        <p>{{ permohonan.pelanggan.nama }}</p>
+
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- DETAILS -->
+                    <div class="mb-5">
+                        <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Rincian
+                            Layanan</div>
+                        <h4 class="fw-800" style="color: var(--primary-green); font-family: 'Montserrat';">{{
+                            permohonan.layanan.nama_layanan }}</h4>
+                        <p class="text-muted mb-0">Atas Nama: <strong>{{ permohonan.pelanggan.nama }}</strong></p>
                     </div>
 
-                    <ul class="list-group mb-4">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Biaya Jasa Admin
-                            <span>{{ permohonan.layanan.harga_jasa|rupiah }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Biaya Resmi (Pajak/PNBP)
-                            <span>{{ permohonan.biaya_resmi|rupiah }}</span>
-                        </li>
+                    <!-- BREAKDOWN -->
+                    <div class="mb-4">
+                        <div class="price-item">
+                            <span class="text-muted">Biaya Jasa Admin</span>
+                            <span class="fw-bold text-dark">{{ permohonan.layanan.harga_jasa|rupiah }}</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="text-muted">Biaya Resmi (Pajak/PNBP)</span>
+                            <span class="fw-bold text-dark">{{ permohonan.biaya_resmi|rupiah }}</span>
+                        </div>
                         {% if pembayaran.biaya_pengiriman %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Ongkos Kirim
-                            <span>{{ pembayaran.biaya_pengiriman|rupiah }}</span>
-                        </li>
+                        <div class="price-item">
+                            <span class="text-muted">Ongkos Kirim Kurir</span>
+                            <span class="fw-bold text-dark">{{ pembayaran.biaya_pengiriman|rupiah }}</span>
+                        </div>
                         {% endif %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold">
-                            TOTAL BAYAR
-                            <span class="text-success fs-5">{{ pembayaran.total_biaya|rupiah }}</span>
-                        </li>
-                    </ul>
+                    </div>
 
-                    {% if pembayaran.status_pembayaran == 'pending' %}
-                        <p class="text-center mb-3">Pilih Metode Pembayaran:</p>
+                    <div class="total-box">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted small fw-bold">TOTAL YANG HARUS DIBAYAR</div>
+                                <h3 class="amount mb-0">{{ pembayaran.total_biaya|rupiah }}</h3>
+                            </div>
+                            <i class="bi bi-wallet2 fs-1 opacity-25 text-primary-custom"></i>
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="mt-5">
+                        {% if pembayaran.status_pembayaran == 'pending' %}
+                        <p class="text-center text-muted small fw-bold mb-3">SILAKAN PILIH METODE PEMBAYARAN</p>
                         <form method="POST">
                             {% csrf_token %}
-                            <div class="d-grid gap-2">
-                                <button type="submit" name="metode" value="online" class="btn btn-success btn-lg">
-                                    💳 Bayar Sekarang (Online)
+                            <div class="d-grid gap-3">
+                                <button type="submit" name="metode" value="online"
+                                    class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-800 shadow-lg">
+                                    <i class="bi bi-credit-card me-2"></i> BAYAR ONLINE SEKARANG
                                 </button>
-                                
-                                <button type="submit" name="metode" value="tunai" class="btn btn-outline-secondary">
-                                    🏢 Bayar Tunai di Kantor
+
+                                <button type="submit" name="metode" value="tunai"
+                                    class="btn btn-light btn-lg py-3 rounded-pill fw-bold border-0 text-muted">
+                                    <i class="bi bi-building me-2"></i> BAYAR TUNAI DI KANTOR
                                 </button>
                             </div>
                         </form>
-                    {% else %}
-                        <div class="alert alert-success text-center">
-                            <h4 class="alert-heading">LUNAS ✅</h4>
-                            <p>Terima kasih, pembayaran Anda telah kami terima.</p>
+                        {% else %}
+                        <div
+                            class="text-center py-4 bg-success bg-opacity-10 rounded-4 border border-success border-opacity-25 mb-4">
+                            <i class="bi bi-patch-check-fill text-success display-4 mb-3"></i>
+                            <h4 class="fw-800 text-success mb-2" style="font-family: 'Montserrat';">PEMBAYARAN BERHASIL!
+                            </h4>
+                            <p class="text-success small fw-bold mb-0">Terima kasih, dokumen Anda sedang segera
+                                diproses.</p>
                         </div>
                         <div class="d-grid">
-                            <a href="{% url 'dashboard' %}" class="btn btn-primary-custom">Kembali ke Dashboard</a>
+                            <a href="{% url 'dashboard' %}"
+                                class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-800">
+                                KEMBALI KE DASHBOARD <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
                         </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
 
                 </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted small">Butuh bantuan terkait pembayaran? <a href="#"
+                        class="text-primary-custom fw-bold text-decoration-none">Hubungi Support</a></p>
             </div>
         </div>
     </div>
