@@ -1,0 +1,159 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Finalisasi Permohonan{% endblock %}
+{% block content %}
+<style>
+    .final-container {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-master {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .doc-preview {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        background: #f8f9fa;
+    }
+
+    .btn-finish {
+        background: var(--primary-green) !important;
+        color: white !important;
+        padding: 12px 25px;
+        border-radius: 12px;
+        font-weight: bold;
+        border: none;
+    }
+
+    .btn-bast {
+        background: #0dcaf0 !important;
+        color: white !important;
+        padding: 12px 25px;
+        border-radius: 12px;
+        font-weight: bold;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+    }
+</style>
+
+<div class="container py-5 final-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-master">
+                <div class="card-header bg-white py-4 px-4 border-0 text-center">
+                    <div class="mb-3 d-inline-flex bg-primary-custom text-white rounded-3 align-items-center justify-content-center shadow-sm"
+                        style="width: 56px; height: 56px;">
+                        <i class="bi bi-rocket-takeoff fs-3"></i>
+                    </div>
+                    <h4 class="fw-800 mb-0" style="font-family: 'Montserrat';">Finalisasi Dokumen</h4>
+                    <p class="text-muted small mb-0">{{ item.kode_permohonan }} — <strong>
+                            {{ item.layanan.nama_layanan }}</strong></p>
+                </div>
+
+                <div class="card-body p-4 pt-0">
+                    <hr class="opacity-10 mb-4">
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Bukti Hasil
+                                Lapangan</label>
+                            <div class="doc-preview">
+                                {% if item.hasil_lapangan %}
+                                <img src="{{ item.hasil_lapangan.url }}" class="img-fluid" alt="Hasil Lapangan">
+                                {% else %}
+                                <div class="p-5 text-center text-muted">
+                                    <i class="bi bi-image fs-1 opacity-25 d-block mb-2"></i>
+                                    Tidak ada foto dokumentasi.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Informasi
+                                    Penyerahan</label>
+                                <p class="mb-1"><strong>Metode:</strong> {{ item.metode_pengiriman }}</p>
+                                <p class="mb-1"><strong>Pelanggan:</strong> {{ item.pelanggan.nama }}</p>
+                                <p class="mb-3"><strong>WhatsApp:</strong> {{ item.pelanggan.no_whatsapp }}</p>
+
+                                {% if item.metode_pengiriman == 'Ambil di Kantor' %}
+                                <div class="alert alert-info py-2 small">
+                                    <i class="bi bi-info-circle me-1"></i> Pelanggan akan mengambil ke kantor. Harap
+                                    cetak <strong>Berita Acara (BAST)</strong> saat serah terima.
+                                </div>
+                                <a href="{% url 'cetak_bast' item.id %}" target="_blank"
+                                    class="btn-bast w-100 text-center mb-2">
+                                    <i class="bi bi-printer me-2"></i> Cetak BAST (Handover)
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-grid gap-3">
+                            {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                            <div class="mb-2">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Nomor Resi
+                                    Pengiriman</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-truck"></i></span>
+                                    <input type="text" name="nomor_resi" class="form-control form-control-lg"
+                                        placeholder="Masukkan Nomor Resi (JNE/J&T/dll)" required>
+                                </div>
+                                <div class="form-text">Pelanggan akan menerima notifikasi nomor resi ini.</div>
+                            </div>
+                            <button type="submit" name="action" value="courier" class="btn-finish btn-lg shadow">
+                                <i class="bi bi-send me-2"></i> Kirim Dokumen & Selesaikan
+                            </button>
+
+                            {% elif item.status_proses == 'Siap Diambil' %}
+                            <div class="alert alert-success border-success bg-success bg-opacity-10">
+                                <i class="bi bi-check-circle-fill me-2"></i>Status: <strong>Siap Diambil</strong>.
+                                Pelanggan sudah dikabari.
+                            </div>
+                            <button type="submit" name="action" value="confirm_pickup"
+                                class="btn btn-success btn-lg shadow fw-bold py-3">
+                                <i class="bi bi-check2-all me-2"></i> Konfirmasi Dokumen Sudah Diambil (Selesai)
+                            </button>
+
+                            {% else %}
+                            <button type="submit" name="action" value="notify_pickup"
+                                class="btn btn-primary btn-lg shadow fw-bold py-3">
+                                <i class="bi bi-bell me-2"></i> Kabari Pelanggan (Siap Diambil)
+                            </button>
+                            <div class="text-center text-muted small mt-2">
+                                Klik ini untuk mengirim email notifikasi ke pelanggan agar datang ke kantor.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'staff_dashboard' %}" class="text-muted text-decoration-none small fw-bold">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -205,7 +205,7 @@
                 <tr>
                     <td class="text-center">{{ forloop.counter }}</td>
                     <td>{{ stat.layanan__nama_layanan }}</td>
-                    <td class="text-right">{{ stat.jumlah }}</td>
+                    <td class="text-right">{{ stat.jumlah_count }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -215,7 +215,7 @@
             </tbody>
         </table>
 
-        <h4>Daftar Permohonan (Top 20)</h4>
+        <h4>Daftar Permohonan (Semua)</h4>
         <table>
             <thead>
                 <tr>
@@ -261,8 +261,8 @@
                 {% for stat in metode_stats %}
                 <tr>
                     <td>{{ stat.metode_pembayaran|default:"Belum Diset" }}</td>
-                    <td class="text-right">{{ stat.jumlah }}</td>
-                    <td class="text-right"><strong>Rp {{ stat.total|floatformat:0 }}</strong></td>
+                    <td class="text-right">{{ stat.jumlah_count }}</td>
+                    <td class="text-right"><strong>Rp {{ stat.total_bayar|floatformat:0 }}</strong></td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -276,7 +276,7 @@
             </tbody>
         </table>
 
-        <h4>Daftar Pembayaran Lunas (Top 20)</h4>
+        <h4>Daftar Pembayaran Lunas (Semua)</h4>
         <table>
             <thead>
                 <tr>

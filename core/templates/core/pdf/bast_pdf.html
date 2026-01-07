@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>BAST_{{ permohonan.kode_permohonan }}</title>
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 2cm;
+            }
+
+            body {
+                margin: 0;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #064e3b;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #064e3b;
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 30px;
+        }
+
+        .content {
+            font-size: 12px;
+            margin-bottom: 30px;
+        }
+
+        .content table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .content td {
+            padding: 5px 0;
+        }
+
+        .signature-table {
+            width: 100%;
+            margin-top: 60px;
+            font-size: 12px;
+        }
+
+        .signature-table td {
+            width: 50%;
+            text-align: center;
+            height: 100px;
+            vertical-align: bottom;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 9px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>BIROJASA APP - SOLUSI DOKUMEN</h1>
+        <p>Jl. Teknologi No. 10, Bandung | Telp: 0812-3456-7890 | Website: birojasa.com</p>
+    </div>
+
+    <div class="title">BERITA ACARA SERAH TERIMA DOKUMEN</div>
+
+    <div class="content">
+        <p>Pada hari ini, <strong>{{ tanggal|date:"l, d F Y" }}</strong>, bertempat di Kantor BiroJasaApp Bandung, kami
+            yang bertanda tangan di bawah ini telah melakukan serah terima dokumen fisik untuk permohonan dengan rincian
+            sebagai berikut:</p>
+
+        <table>
+            <tr>
+                <td width="30%">Nomor Permohonan</td>
+                <td>: <strong>{{ permohonan.kode_permohonan }}</strong></td>
+            </tr>
+            <tr>
+                <td>Nama Pelanggan</td>
+                <td>: {{ permohonan.pelanggan.nama }}</td>
+            </tr>
+            <tr>
+                <td>Jenis Layanan</td>
+                <td>: {{ permohonan.layanan.nama_layanan }}</td>
+            </tr>
+            <tr>
+                <td>Total Pembayaran</td>
+                <td>: Rp {{ pembayaran.total_biaya }} (LUNAS)</td>
+            </tr>
+        </table>
+
+        <p>Dokumen yang diserahkan telah diperiksa oleh kedua belah pihak dan dinyatakan lengkap serta dalam kondisi
+            baik. Dengan ditandatanganinya Berita Acara ini, maka tanggung jawab atas dokumen tersebut telah beralih
+            kepada pihak Pelanggan.</p>
+    </div>
+
+    <table class="signature-table">
+        <tr>
+            <td>
+                Pihak Pelanggan / Yang Menerima,<br><br><br><br>
+                ( ________________________ )
+            </td>
+            <td>
+                Pihak BiroJasaApp / Yang Menyerahkan,<br><br><br><br>
+                ( ________________________ )
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        Diterbitkan oleh sistem BiroJasaApp pada {{ tanggal|date:"d/m/Y H:i" }} WIB. Dokumen sah tanpa tanda tangan
+        digital jika disertai stempel perusahaan.
+    </div>
+    <script>
+        window.onload = function () {
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

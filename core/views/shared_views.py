@@ -47,55 +47,54 @@ def revisi_pengajuan_view(request, permohonan_id):
     # Security: Hanya pemilik yang boleh revisi
     permohonan = get_object_or_404(Permohonan, id=permohonan_id, pelanggan__email=request.user.email)
     
-    # Pastikan hanya yang DITOLAK yang bisa direvisi
-    if permohonan.status_proses != 'Ditolak':
-        messages.error(request, "Permohonan ini tidak dalam status Ditolak.")
+    # Izinkan revisi jika status 'Ditolak' (total) ATAU 'Revisi' (parsial)
+    if permohonan.status_proses not in ['Ditolak', 'Revisi']:
+        messages.error(request, "Permohonan ini tidak butuh perbaikan saat ini.")
         return redirect('dashboard')
 
-    # Ambil syarat dokumen untuk layanan ini
-    syarat_dokumen = LayananDokumen.objects.filter(layanan=permohonan.layanan)
+    # Ambil dokumen yang butuh perbaikan
+    if permohonan.status_proses == 'Revisi':
+        dokumen_revisi = permohonan.berkas_upload.filter(status_file='Perbaikan')
+    else:
+        # Jika ditolak total, tampilkan semua syarat layanan
+        dokumen_revisi = permohonan.berkas_upload.all()
 
     if request.method == 'POST':
         try:
-            # 1. Update Dokumen (Hanya yang diupload ulang)
-            for syarat in syarat_dokumen:
-                nama_input = f"file_{syarat.master_dokumen.id}"
-                file_upload = request.FILES.get(nama_input)
+            files_count = 0
+            for dok in dokumen_revisi:
+                file_input_name = f"file_dok_{dok.id}"
+                file_upload = request.FILES.get(file_input_name)
                 
                 if file_upload:
-                    # Cari dokumen lama
-                    doc_obj, created = Dokumen.objects.get_or_create(
-                        permohonan=permohonan,
-                        master_dokumen=syarat.master_dokumen,
-                        defaults={
-                            'kode_dokumen': f"DOK-{permohonan.id}-{syarat.master_dokumen.id}",
-                            'path_file': file_upload
-                        }
-                    )
-                    # Jika sudah ada, update filenya
-                    if not created:
-                        doc_obj.path_file = file_upload
-                        doc_obj.save()
+                    dok.path_file = file_upload
+                    dok.status_file = 'Digital Diupload' # Reset status
+                    dok.catatan_perbaikan = None # Hapus catatan lama
+                    dok.save()
+                    files_count += 1
 
-            # 2. Reset Status Permohonan
+            # 2. Reset Status Permohonan ke Verifikasi Ulang
             permohonan.status_proses = 'Menunggu Verifikasi'
-            permohonan.catatan_penolakan = None # Hapus catatan penolakan lama
             
-            # Update catatan baru jika ada
+            # Jika sebelumnya ditolak total, hapus catatan penolakan
+            if permohonan.status_proses == 'Ditolak':
+                permohonan.catatan_penolakan = None
+                
+            # Update catatan pelanggan jika ada
             catatan_baru = request.POST.get('catatan')
             if catatan_baru:
                 permohonan.catatan_pelanggan = catatan_baru
                 
             permohonan.save()
 
-            messages.success(request, 'Revisi berhasil dikirim! Admin akan mengecek ulang.')
+            messages.success(request, f'Berhasil mengupdate {files_count} dokumen. Permohonan Anda dikirim ulang ke admin.')
             return redirect('dashboard')
 
         except Exception as e:
-            messages.error(request, f"Gagal revisi: {e}")
+            messages.error(request, f"Gagal mengirim revisi: {e}")
 
     context = {
         'permohonan': permohonan,
-        'syarat_dokumen': syarat_dokumen
+        'dokumen_revisi': dokumen_revisi
     }
     return render(request, 'core/shared/form_revisi.html', context)

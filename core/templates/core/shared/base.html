@@ -16,6 +16,7 @@
         rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <style>
         :root {
@@ -303,6 +304,7 @@
         {% endfor %}
         {% endif %}
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

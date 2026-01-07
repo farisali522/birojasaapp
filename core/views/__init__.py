@@ -18,7 +18,8 @@ from .pelanggan_views import (
     dashboard_view,
     pilih_layanan_view,
     form_pengajuan_view,
-    tagihan_view
+    tagihan_view,
+    konfirmasi_selesai_view
 )
 
 # Staff Admin Views
@@ -29,13 +30,15 @@ from .staff_admin_views import (
     verifikasi_permohonan_view,
     tugaskan_staff_view,
     finalisasi_permohonan_view,
-    tolak_permohonan_view
+    tolak_permohonan_view,
+    cetak_bast_view
 )
 
 # Staff Keuangan (Finance) Views
 from .staff_keuangan_views import (
     keuangan_dashboard_view,
-    konfirmasi_lunas_view
+    konfirmasi_lunas_view,
+    cetak_struk_view
 )
 
 # Staff Lapangan (Field) Views
@@ -81,6 +84,7 @@ __all__ = [
     'pilih_layanan_view',
     'form_pengajuan_view',
     'tagihan_view',
+    'konfirmasi_selesai_view',
     # Staff Admin
     'staff_dashboard_view',
     'staff_input_walkin_view',
@@ -89,9 +93,11 @@ __all__ = [
     'tugaskan_staff_view',
     'finalisasi_permohonan_view',
     'tolak_permohonan_view',
+    'cetak_bast_view',
     # Staff Keuangan
     'keuangan_dashboard_view',
     'konfirmasi_lunas_view',
+    'cetak_struk_view',
     # Staff Lapangan
     'lapangan_dashboard_view',
     'update_status_lapangan_view',

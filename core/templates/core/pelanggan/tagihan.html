@@ -79,8 +79,8 @@
                     <div class="mb-5">
                         <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Rincian
                             Layanan</div>
-                        <h4 class="fw-800" style="color: var(--primary-green); font-family: 'Montserrat';">{{
-                            permohonan.layanan.nama_layanan }}</h4>
+                        <h4 class="fw-800" style="color: var(--primary-green); font-family: 'Montserrat';">
+                            {{ permohonan.layanan.nama_layanan }}</h4>
                         <p class="text-muted mb-0">Atas Nama: <strong>{{ permohonan.pelanggan.nama }}</strong></p>
                     </div>
 
@@ -116,20 +116,112 @@
                     <div class="mt-5">
                         {% if pembayaran.status_pembayaran == 'pending' %}
                         <p class="text-center text-muted small fw-bold mb-3">SILAKAN PILIH METODE PEMBAYARAN</p>
-                        <form method="POST">
+
+                        <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                            <div class="d-grid gap-3">
+                            <div class="d-grid gap-2">
+                                <!-- ONLINE -->
                                 <button type="submit" name="metode" value="online"
-                                    class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-800 shadow-lg">
-                                    <i class="bi bi-credit-card me-2"></i> BAYAR ONLINE SEKARANG
+                                    class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-800 shadow-sm mb-2">
+                                    <i class="bi bi-credit-card me-2"></i> BAYAR ONLINE (INSTANT)
                                 </button>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <button type="button" onclick="showPaymentGuide('transfer')"
+                                            class="btn btn-outline-dark w-100 py-3 rounded-4 fw-bold">
+                                            <i class="bi bi-bank d-block mb-1 fs-4"></i> Transfer
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" onclick="showPaymentGuide('qris')"
+                                            class="btn btn-outline-primary w-100 py-3 rounded-4 fw-bold">
+                                            <i class="bi bi-qr-code-scan d-block mb-1 fs-4"></i> QRIS
+                                        </button>
+                                    </div>
+                                </div>
 
                                 <button type="submit" name="metode" value="tunai"
                                     class="btn btn-light btn-lg py-3 rounded-pill fw-bold border-0 text-muted">
                                     <i class="bi bi-building me-2"></i> BAYAR TUNAI DI KANTOR
                                 </button>
                             </div>
+
+                            <!-- HIDDEN SECTION FOR PROOF UPLOAD -->
+                            <div id="proof-upload-section"
+                                class="d-none mt-4 p-4 border rounded-4 bg-light animate__animated animate__fadeIn">
+                                <div id="guide-transfer" class="d-none">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-1"></i> Instruksi Transfer
+                                        Bank</h6>
+                                    <div class="bg-white p-3 rounded-3 border mb-3">
+                                        <div class="small text-muted mb-1">Bank Mandiri (BiroJasa App)</div>
+                                        <div class="fw-800 fs-5 text-dark">123-00-987654-321</div>
+                                    </div>
+                                </div>
+
+                                <div id="guide-qris" class="d-none text-center">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-qr-code me-1"></i> Scan QRIS</h6>
+                                    <div class="bg-white p-2 rounded-3 border mb-3 d-inline-block">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BiroJasaApp-INV-{{ pembayaran.nomor_invoice }}"
+                                            alt="QRIS" class="img-fluid">
+                                    </div>
+                                    <div class="small text-muted mb-3 italic">Scan dengan aplikasi e-wallet apa saja.
+                                    </div>
+                                    <!-- TEMPORARY INSTANT BYPASS -->
+                                    <div class="d-grid mb-3">
+                                        <button type="submit" name="metode" value="qris_instant"
+                                            class="btn btn-primary px-4 py-3 rounded-pill fw-800 shadow-sm"
+                                            formnovalidate>
+                                            <i class="bi bi-patch-check-fill me-2"></i> SAYA SUDAH BAYAR (OTOMATIS)
+                                        </button>
+                                        <div class="small text-primary mt-2 fw-bold">
+                                            <i class="bi bi-shield-lock me-1"></i> Mode Gateway: Sistem cek otomatis
+                                            24/7.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- MANUAL FIELDS (FOR TRANSFER) -->
+                                <div id="manual-upload-fields">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small">Upload Bukti Transfer/Bayar</label>
+                                        <input type="file" name="bukti_bayar" class="form-control" id="proof-input">
+                                    </div>
+                                    <button type="submit" name="metode" value="manual"
+                                        class="btn btn-dark w-100 py-2 rounded-pill fw-bold">
+                                        KIRIM BUKTI PEMBAYARAN
+                                    </button>
+                                </div>
+                                <input type="hidden" name="metode_pilihan" id="hidden-metode">
+                            </div>
                         </form>
+
+                        <script>
+                            function showPaymentGuide(type) {
+                                const uploadSection = document.getElementById('proof-upload-section');
+                                const transferGuide = document.getElementById('guide-transfer');
+                                const qrisGuide = document.getElementById('guide-qris');
+                                const manualFields = document.getElementById('manual-upload-fields');
+
+                                uploadSection.classList.remove('d-none');
+                                transferGuide.classList.add('d-none');
+                                qrisGuide.classList.add('d-none');
+
+                                if (type === 'transfer') {
+                                    transferGuide.classList.remove('d-none');
+                                    manualFields.classList.remove('d-none');
+                                    document.getElementById('hidden-metode').value = 'Transfer Bank';
+                                    document.getElementById('proof-input').setAttribute('required', 'required');
+                                } else {
+                                    qrisGuide.classList.remove('d-none');
+                                    manualFields.classList.add('d-none'); // Hide upload for QRIS
+                                    document.getElementById('hidden-metode').value = 'QRIS';
+                                    document.getElementById('proof-input').removeAttribute('required');
+                                }
+
+                                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                            }
+                        </script>
                         {% else %}
                         <div
                             class="text-center py-4 bg-success bg-opacity-10 rounded-4 border border-success border-opacity-25 mb-4">

@@ -9,42 +9,63 @@
                     ✏️ Revisi Pengajuan: {{ permohonan.kode_permohonan }}
                 </div>
                 <div class="card-body p-4">
-                    
-                    <div class="alert alert-danger">
-                        <strong>Alasan Penolakan Sebelumnya:</strong><br>
-                        {{ permohonan.catatan_penolakan }}
+
+                    <div class="alert alert-warning border-0 rounded-4 p-4 mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                            <div>
+                                <h5 class="fw-bold mb-1">Instruksi Perbaikan</h5>
+                                <p class="mb-0">Silakan perbarui dokumen di bawah ini sesuai dengan catatan dari admin.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
-                        <h6 class="fw-bold text-dark mb-3">Perbarui Dokumen:</h6>
-                        
-                        {% for syarat in syarat_dokumen %}
-                        <div class="mb-4 border-bottom pb-3">
-                            <label class="form-label fw-bold">
-                                {{ forloop.counter }}. {{ syarat.master_dokumen.nama_dokumen }}
-                            </label>
-                            
-                            <div class="mb-2">
-                                <span class="badge bg-secondary">Status: File Tersimpan</span>
-                                </div>
 
-                            <input type="file" name="file_{{ syarat.master_dokumen.id }}" class="form-control border-warning">
-                            <div class="form-text text-muted">Upload file baru <b>HANYA JIKA</b> ingin mengganti yang lama.</div>
+                        <h6 class="fw-bold text-dark mb-4 text-uppercase small ls-1">Daftar Dokumen Bermasalah:</h6>
+
+                        {% for dok in dokumen_revisi %}
+                        <div class="card border-0 bg-light rounded-4 p-4 mb-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <label class="fw-bold text-dark fs-5">
+                                    {{ forloop.counter }}. {{ dok.master_dokumen.nama_dokumen }}
+                                </label>
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">Butuh
+                                    Update</span>
+                            </div>
+
+                            <div class="bg-white border-start border-danger border-4 p-3 mb-4 rounded-3 shadow-sm">
+                                <small class="text-muted d-block mb-1 fw-bold text-uppercase"
+                                    style="font-size: 0.7rem;">Alasan Penolakan:</small>
+                                <p class="mb-0 text-danger fw-bold italic">
+                                    {{ dok.catatan_perbaikan|default:"File tidak sesuai kriteria." }}
+                                </p>
+                            </div>
+
+                            <div class="mb-1">
+                                <label class="form-label small fw-bold">Upload File Baru (PDF/Gambar):</label>
+                                <input type="file" name="file_dok_{{ dok.id }}" class="form-control border-danger"
+                                    required>
+                            </div>
                         </div>
                         {% endfor %}
 
-                        <div class="mb-3">
-                            <label class="form-label">Catatan Revisi (Opsional)</label>
-                            <textarea name="catatan" class="form-control" rows="2">{{ permohonan.catatan_pelanggan }}</textarea>
+                        <div class="card border-0 bg-white shadow-sm rounded-4 p-4 mb-4">
+                            <label class="form-label fw-bold">Pesan Tambahan untuk Admin (Opsional)</label>
+                            <textarea name="catatan" class="form-control bg-light border-0" rows="3"
+                                placeholder="Tuliskan penjelasan tambahan jika ada...">{{ permohonan.catatan_pelanggan }}</textarea>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning btn-lg fw-bold">
-                                Kirim Revisi ➔
+                        <div class="d-grid gap-3 pt-2">
+                            <button type="submit"
+                                class="btn btn-primary-custom btn-lg py-3 rounded-pill fw-bold shadow-lg">
+                                <i class="bi bi-send-check me-2"></i> Kirim Perbaikan Sekarang
                             </button>
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+                            <a href="{% url 'dashboard' %}"
+                                class="btn btn-link text-muted text-decoration-none fw-bold small">Nanti Saja, Kembali
+                                ke Dashboard</a>
                         </div>
                     </form>
 

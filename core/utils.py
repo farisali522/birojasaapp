@@ -6,6 +6,38 @@ from io import BytesIO
 try: from xhtml2pdf import pisa
 except ImportError: pisa = None
 
+import os
+from django.conf import settings
+from django.contrib.staticfiles import finders
+
+def link_callback(uri, rel):
+    """
+    Convert HTML URIs to absolute system paths so xhtml2pdf can verify resources
+    """
+    result = finders.find(uri)
+    if result:
+        if not isinstance(result, (list, tuple)):
+            result = [result]
+        result = list(os.path.realpath(path) for path in result)
+        path = result[0]
+    else:
+        sUrl = settings.STATIC_URL        # Typically /static/
+        sRoot = settings.STATIC_ROOT      # Typically /home/userX/project_static/
+        mUrl = settings.MEDIA_URL         # Typically /media/
+        mRoot = settings.MEDIA_ROOT       # Typically /home/userX/project_media/
+
+        if uri.startswith(mUrl):
+            path = os.path.join(mRoot, uri.replace(mUrl, ""))
+        elif uri.startswith(sUrl):
+            path = os.path.join(sRoot, uri.replace(sUrl, ""))
+        else:
+            return uri
+
+    # make sure that file exists
+    if not os.path.isfile(path):
+            raise Exception(f'media URI must start with {sUrl} or {mUrl}')
+    return path
+
 # --- FUNGSI GENERATE PDF ---
 def render_to_pdf(template_src, context_dict={}):
     """
@@ -20,8 +52,8 @@ def render_to_pdf(template_src, context_dict={}):
         html  = template.render(context_dict)
         result = BytesIO()
         
-        # Konversi HTML ke PDF
-        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        # Konversi HTML ke PDF dengan link_callback
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result, link_callback=link_callback)
         
         if not pdf.err:
             return result.getvalue() # Mengembalikan file PDF mentah

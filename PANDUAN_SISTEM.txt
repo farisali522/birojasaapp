@@ -1,0 +1,120 @@
+BIROJASAAPP - PANDUAN TEKNIS LENGKAP (INSTALASI & PENGGUNAAN)
+
+Dokumen ini berisi langkah-langkah detail untuk setup awal (Environment, Database, Firebase) dan panduan fitur mendalam untuk setiap aktor sistem.
+
+----------------------------------------------------------
+1. PANDUAN INSTALASI AWAL
+----------------------------------------------------------
+A. Cara Buka Terminal
+- VS Code: Tekan Ctrl + ` atau menu Terminal > New Terminal.
+- Mac: Command + Space, ketik "Terminal".
+- Windows: Start Menu, ketik "CMD" atau "PowerShell".
+
+B. Setup Environment
+1. Clone: git clone https://github.com/farisali522/birojasaapp.git
+2. Masuk Folder: cd birojasaapp
+3. Buat Venv: python -m venv venv
+4. Aktivasi: 
+   - Windows: .\venv\Scripts\activate
+   - Mac/Linux: source venv/bin/activate
+5. Install Library: pip install -r requirements.txt
+
+----------------------------------------------------------
+2. SETUP DATABASE (MYSQL)
+----------------------------------------------------------
+Aplikasi ini menggunakan MySQL sebagai database utama:
+1. Aktifkan MySQL (via XAMPP/MAMP/Docker).
+2. Buat database: CREATE DATABASE db_birojasa;
+3. Pastikan user (default: root) dan password sudah sesuai.
+
+----------------------------------------------------------
+3. SETUP CONFIG ENVIRONMENT (.env)
+----------------------------------------------------------
+Buat file ".env" di root folder. Contoh isi:
+
+# DJANGO CORE
+SECRET_KEY=isi_acak_panjang
+DEBUG=True
+ALLOWED_HOSTS=localhost, 127.0.0.1, *
+
+# DATABASE (MYSQL)
+DB_NAME=db_birojasa
+DB_USER=root
+DB_PASSWORD=isi_password_mysql
+DB_HOST=localhost
+DB_PORT=3306
+
+# EMAIL (SMTP GMAIL)
+EMAIL_HOST_USER=emailanda@gmail.com
+EMAIL_HOST_PASSWORD=isi_16_digit_app_password
+
+# FIREBASE CONFIG
+FIREBASE_KEY_PATH=firebase_key.json
+FIREBASE_API_KEY=xxx
+FIREBASE_AUTH_DOMAIN=xxx
+FIREBASE_PROJECT_ID=xxx
+FIREBASE_STORAGE_BUCKET=xxx
+FIREBASE_MESSAGING_SENDER_ID=xxx
+FIREBASE_APP_ID=xxx
+
+----------------------------------------------------------
+4. SETUP FIREBASE SSO & AUTH (KRUSIAL)
+----------------------------------------------------------
+1. Ke Firebase Console > Project Settings > Service Accounts.
+2. Klik "Generate New Private Key" > Download JSON.
+3. Rename menjadi "firebase_key.json" & simpan di root project.
+4. Pantau .env untuk API Key dsb (Ambil dari tab General > Web App).
+
+----------------------------------------------------------
+5. MENJALANKAN APLIKASI
+----------------------------------------------------------
+1. python manage.py makemigrations
+2. python manage.py migrate
+3. python manage.py runserver
+
+----------------------------------------------------------
+6. PANDUAN FITUR & AKTOR (RBAC)
+----------------------------------------------------------
+
+A. MANAJER (OWNER)
+- Dashboard Premium: Visualisasi omzet, tren order, dan status piutang.
+- Laporan Gabungan: Cetak PDF/CSV laporan operasional & keuangan.
+- Karyawan Management: Tambah/Edit/Hapus akun staff dan atur role.
+- Monitoring: Melacak IP Address dan waktu login terakhir staff.
+
+B. STAFF ADMINISTRASI (LOKET)
+- Input Walk-in: Pendaftaran pelanggan luring dengan form cepat.
+- Validasi & Verifikasi: Cek dokumen fisik vs digital, beri catatan jika kurang.
+- Penugasan: Menunjuk Staff Lapangan untuk mengerjakan permohonan.
+- Arsip Digital: Upload dokumen pendukung setelah divalidasi.
+
+C. STAFF KEUANGAN (KASIR)
+- Konfirmasi Pembayaran: Update status "Paid" untuk Tunai atau Transfer.
+- Auto-Receipt: Sistem otomatis membuat Struk PDF dan kirim ke email pelanggan.
+- Audit Log: Mencatat setiap transaksi masuk untuk transparansi.
+
+D. STAFF LAPANGAN (KURIR/PROSESOR)
+- Tracking Progres: Update status berkas (Proses Lapangan -> Kembali -> Selesai).
+- Notifikasi Real-time: Email otomatis terkirim ke pelanggan tiap kali status berubah.
+- Detail Tugas: Melihat berkas digital yang diperlukan saat di instansi.
+
+E. PELANGGAN (USER)
+- Portal Mandiri: Order jasa via web, upload syarat, dan pantau status.
+- Tracking Bar: Progress bar visual untuk memantau sejauh mana dokumen diproses.
+
+----------------------------------------------------------
+7. ALUR BISNIS (SINARI WORKFLOW)
+----------------------------------------------------------
+Order (Online/Walk-in) -> Pembayaran (Pending) -> Verifikasi Dokumen & Staf -> 
+Proses Keuangan (Paid + Struk PDF) -> Proses Lapangan (Update Real-time) -> 
+Selesai (Penyerahan Dokumen/Kirim).
+
+----------------------------------------------------------
+8. FITUR KEAMANAN & AUDIT
+----------------------------------------------------------
+- Audit Trail: Semua aksi (Login, Update Status, Pembayaran) tersimpan di database.
+- Database Timezone: Menggunakan Asia/Jakarta (USE_TZ = False) untuk ketepatan waktu.
+- Jazzmin UI: Tampilan Admin Panel yang profesional dan responsif.
+
+Dokumen ini adalah panduan standar operasional Biro Jasa Digital.
+----------------------------------------------------------

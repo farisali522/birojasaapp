@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Struk Pembayaran - {{ pembayaran.nomor_invoice }}</title>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 0;
+                padding: 20px;
+            }
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-size: 0.8rem;
+        }
+
+        .info {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .info div {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .details-table {
+            width: 100%;
+            border-bottom: 2px dashed #000;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .details-table td {
+            padding: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+
+        .status-stamp {
+            border: 3px solid #000;
+            display: inline-block;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 10px 0;
+            transform: rotate(-5deg);
+        }
+
+        .btn-print {
+            background: #064e3b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h2>BIROJASA APP</h2>
+        <p>Solusi Dokumen Kendaraan Terpercaya</p>
+        <p>Jl. Teknologi No. 10, Bandung</p>
+    </div>
+
+    <div class="header">
+        <div class="status-stamp">LUNAS</div>
+    </div>
+
+    <div class="info">
+        <div><span>No. Invoice:</span> <strong>{{ pembayaran.nomor_invoice }}</strong></div>
+        <div><span>Tanggal:</span> <span>{{ pembayaran.updated_at|date:"d/m/Y H:i" }}</span></div>
+        <div><span>Kasir:</span> <span>KASIR-01</span></div>
+        <hr style="border: none; border-top: 1px dashed #000; margin: 10px 0;">
+        <div><span>Pelanggan:</span> <span>{{ permohonan.pelanggan.nama }}</span></div>
+    </div>
+
+    <table class="details-table">
+        <tr>
+            <td>{{ permohonan.layanan.nama_layanan }}</td>
+            <td class="text-right">{% load rupiah_filters %}{{ permohonan.layanan.harga_jasa|rupiah }}</td>
+        </tr>
+        <tr>
+            <td>Biaya Resmi (PAJAK/PNBP)</td>
+            <td class="text-right">{{ permohonan.biaya_resmi|rupiah }}</td>
+        </tr>
+        {% if pembayaran.biaya_pengiriman > 0 %}
+        <tr>
+            <td>Biaya Kurir</td>
+            <td class="text-right">{{ pembayaran.biaya_pengiriman|rupiah }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <div class="total">
+        <span>TOTAL</span>
+        <span>{{ pembayaran.total_biaya|rupiah }}</span>
+    </div>
+
+    <div class="info">
+        <div><span>Metode Bayar:</span> <span>{{ pembayaran.metode_pembayaran }}</span></div>
+    </div>
+
+    <div class="footer">
+        <p>*** TERIMA KASIH ***</p>
+        <p>Simpan struk ini sebagai bukti pembayaran sah.</p>
+        <p>Layanan CS: 0812-3456-7890</p>
+    </div>
+
+    <div class="no-print">
+        <button onclick="window.print();" class="btn-print">KLIK UNTUK CETAK</button>
+        <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 10px;">
+            Halaman ini akan otomatis memicu printer browser.
+        </p>
+    </div>
+
+    <script>
+        // Otomatis cetak saat halaman terbuka sempurna
+        window.onload = function () {
+            window.print();
+        };
+    </script>
+</body>
+
+</html>

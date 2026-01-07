@@ -6,7 +6,7 @@ from django.db.models import Q
 import uuid
 
 # Import Models
-from ..models import Layanan, Pelanggan, Permohonan, LayananDokumen, Dokumen, Pembayaran, Karyawan
+from ..models import Layanan, Pelanggan, Permohonan, LayananDokumen, Dokumen, Pembayaran, Karyawan, PermohonanAuditLog
 
 # Import Helpers
 from ..utils import kirim_notifikasi_email, render_to_pdf
@@ -167,14 +167,11 @@ def tagihan_view(request, permohonan_id):
 
             messages.success(request, "Pembayaran Online Berhasil! Struk dikirim ke email.")
             return redirect('dashboard')
-            
         # --- SKENARIO B: BAYAR TUNAI (HYBRID) ---
         elif metode == 'tunai':
-            # Hanya catat metodenya, JANGAN ubah jadi 'paid'
             pembayaran.metode_pembayaran = 'Tunai'
             pembayaran.save()
             
-            # Kirim notifikasi pengingat (Opsional)
             kirim_notifikasi_email(
                 f"Menunggu Pembayaran Tunai: {permohonan.kode_permohonan}",
                 f"Halo, Anda memilih pembayaran Tunai. Silakan lakukan pembayaran di kasir kantor kami.",
@@ -184,9 +181,72 @@ def tagihan_view(request, permohonan_id):
             messages.info(request, "Silakan bayar tunai di kantor.")
             return redirect('dashboard')
 
+        # --- SKENARIO C: QRIS INSTANT BYPASS (DEMO) ---
+        elif metode == 'qris_instant':
+            pembayaran.metode_pembayaran = 'QRIS (Instant)'
+            pembayaran.status_pembayaran = 'paid'
+            pembayaran.transaction_id_gateway = f"QRIS-DEMO-{uuid.uuid4().hex[:6].upper()}"
+            pembayaran.save()
+            
+            permohonan.status_proses = 'Diproses'
+            permohonan.save()
+            
+            # Email Struk
+            pdf_context = {'permohonan': permohonan, 'pembayaran': pembayaran}
+            pdf_file = render_to_pdf('core/pdf/struk_lunas_pdf.html', pdf_context)
+            subjek = f"LUNAS: Pembayaran QRIS {permohonan.kode_permohonan} Berhasil"
+            pesan = f"Terima kasih {permohonan.pelanggan.nama}, pembayaran QRIS Anda telah diterima."
+            
+            if pdf_file:
+                kirim_notifikasi_email(subjek, pesan, permohonan.pelanggan.email, pdf_file, f"Struk_QRIS_{permohonan.kode_permohonan}.pdf")
+            else:
+                kirim_notifikasi_email(subjek, pesan, permohonan.pelanggan.email)
+
+            messages.success(request, "Pembayaran QRIS Berhasil (Mode Demo)!")
+            return redirect('dashboard')
+
+        # --- SKENARIO C: BAYAR MANUAL (TRANSFER/QRIS) ---
+        elif metode == 'manual':
+            metode_asli = request.POST.get('metode_pilihan')
+            bukti = request.FILES.get('bukti_bayar')
+            
+            if bukti:
+                pembayaran.metode_pembayaran = metode_asli
+                pembayaran.bukti_pembayaran = bukti
+                pembayaran.status_pembayaran = 'pending'
+                pembayaran.save()
+                
+                kirim_notifikasi_email(f"KONFIRMASI BAYAR: {permohonan.kode_permohonan}", f"Bukti bayar diupload.", "admin@birojasa.com")
+
+                messages.success(request, f"Bukti {metode_asli} berhasil diupload. Mohon tunggu verifikasi.")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Harap upload bukti pembayaran.")
+                return redirect('tagihan', permohonan_id=permohonan.id)
+
     # 4. Logika GET (Menampilkan Halaman)
     context = {
         'permohonan': permohonan,
         'pembayaran': pembayaran
     }
     return render(request, 'core/pelanggan/tagihan.html', context)
+@login_required(login_url='login')
+def konfirmasi_selesai_view(request, permohonan_id):
+    # Hanya permohonan milik yang bersangkutan dan statusnya 'Dikirim'
+    permohonan = get_object_or_404(Permohonan, id=permohonan_id, pelanggan__email=request.user.email)
+    
+    if permohonan.status_proses == 'Dikirim':
+        permohonan.status_proses = 'Selesai'
+        permohonan.save()
+        
+        # 🔥 AUDIT LOG
+        PermohonanAuditLog.objects.create(
+            permohonan=permohonan,
+            karyawan=None, # Oleh pelanggan
+            action='completed',
+            notes=f'Pelanggan telah mengonfirmasi penerimaan dokumen. Selesai.'
+        )
+        
+        messages.success(request, "Terima kasih! Permohonan Anda telah dinyatakan Selesai.")
+    
+    return redirect('dashboard')

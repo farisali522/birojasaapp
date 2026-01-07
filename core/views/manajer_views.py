@@ -157,9 +157,10 @@ def cetak_laporan_gabungan_view(request):
     permohonan_ditolak = permohonan_list.filter(status_proses='Ditolak').count()
     
     # Breakdown per layanan
-    layanan_stats = permohonan_list.values('layanan__nama_layanan').annotate(
-        jumlah=Count('id')
-    ).order_by('-jumlah')
+    # Penting: order_by() kosong di awal me-reset sorting default agar GROUP BY valid
+    layanan_stats = permohonan_list.order_by().values('layanan__nama_layanan').annotate(
+        jumlah_count=Count('id')
+    ).order_by('-jumlah_count')
     
     # === LAPORAN KEUANGAN ===
     pembayaran_list = Pembayaran.objects.filter(
@@ -172,10 +173,17 @@ def cetak_laporan_gabungan_view(request):
     total_pemasukan = pembayaran_list.aggregate(Sum('total_biaya'))['total_biaya__sum'] or 0
     
     # Breakdown per metode pembayaran
-    metode_stats = pembayaran_list.values('metode_pembayaran').annotate(
-        jumlah=Count('id'),
-        total=Sum('total_biaya')
-    ).order_by('-total')
+    # Gunakan QS baru agar tidak terganggu sorting/caching dari pembayaran_list
+    stats_payment_qs = Pembayaran.objects.filter(
+        status_pembayaran='paid',
+        updated_at__date__range=[start_date, end_date]
+    )
+    
+    # values() harus di-chain langsung dengan annotate() tanpa ordering default model
+    metode_stats = stats_payment_qs.order_by().values('metode_pembayaran').annotate(
+        jumlah_count=Count('id'),
+        total_bayar=Sum('total_biaya')
+    ).order_by('-total_bayar')
     
     # Jika request adalah cetak PDF
     if 'print' in request.GET:
@@ -192,13 +200,13 @@ def cetak_laporan_gabungan_view(request):
             'permohonan_diproses': permohonan_diproses,
             'permohonan_ditolak': permohonan_ditolak,
             'layanan_stats': layanan_stats,
-            'permohonan_list': permohonan_list[:20],  # Top 20
+            'permohonan_list': permohonan_list,
             
             # Keuangan
             'total_transaksi': total_transaksi,
             'total_pemasukan': total_pemasukan,
             'metode_stats': metode_stats,
-            'pembayaran_list': pembayaran_list[:20],  # Top 20
+            'pembayaran_list': pembayaran_list,
         }
         
         pdf = render_to_pdf('core/pdf/laporan_gabungan_pdf.html', context)

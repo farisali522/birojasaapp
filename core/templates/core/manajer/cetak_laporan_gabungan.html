@@ -81,7 +81,7 @@
             REPORT CENTER
         </span>
         <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -2px;">Cetak Laporan Gabungan</h1>
-        <p class="text-muted fs-5">Laporan Operasional & Keuangan dalam satu dokumen terintegrasi.</p>
+        <p class="text-muted fs-5">Laporan Operasional & Keuangan dalam satu dokumen.</p>
     </div>
 
     <!-- FILTER SECTION -->
@@ -123,9 +123,9 @@
             </div>
 
             {% if label_periode %}
-            <div class="alert alert-info bg-primary-custom bg-opacity-10 text-primary-custom border-0 rounded-3 d-flex align-items-center mb-4"
+            <div class="alert alert-info bg-primary-custom bg-opacity-10 text-white border-0 rounded-3 d-flex align-items-center mb-4"
                 role="alert">
-                <i class="bi bi-calendar-check fs-4 me-3"></i>
+                <i class="bi bi-calendar-check fs-4 me-3 text-white"></i>
                 <div>
                     <strong>Periode Laporan:</strong> {{ label_periode }}
                 </div>
@@ -142,8 +142,8 @@
                         <div class="card-body p-4">
                             <div class="stat-row">
                                 <span class="text-muted">Total Permohonan</span>
-                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">{{
-                                    total_permohonan }}</span>
+                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">
+                                    {{ total_permohonan }}</span>
                             </div>
                             <div class="stat-row">
                                 <span class="d-flex align-items-center"><span
@@ -165,12 +165,12 @@
                             </div>
 
                             <hr class="my-4">
-                            <h6 class="text-muted fw-bold small text-uppercase mb-3">Top 5 Layanan</h6>
-                            {% for stat in layanan_stats|slice:":5" %}
+                            <h6 class="text-muted fw-bold small text-uppercase mb-3">Statistik Layanan</h6>
+                            {% for stat in layanan_stats %}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="text-dark">{{ stat.layanan__nama_layanan }}</span>
-                                <span class="badge bg-primary-custom text-white px-3 py-1 rounded-pill">{{ stat.jumlah
-                                    }}</span>
+                                <span class="badge bg-primary-custom text-white px-3 py-1 rounded-pill">
+                                    {{ stat.jumlah_count }}x</span>
                             </div>
                             {% empty %}
                             <p class="text-muted small mb-0">Tidak ada data layanan.</p>
@@ -189,13 +189,13 @@
                         <div class="card-body p-4">
                             <div class="stat-row">
                                 <span class="text-muted">Total Transaksi</span>
-                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">{{
-                                    total_transaksi }}</span>
+                                <span class="fw-800 fs-5 text-dark" style="font-family: 'Montserrat';">
+                                    {{ total_transaksi }}</span>
                             </div>
                             <div class="stat-row">
                                 <span class="text-muted">Total Pemasukan</span>
-                                <span class="fw-800 fs-4 text-success" style="font-family: 'Montserrat';">Rp {{
-                                    total_pemasukan|floatformat:0 }}</span>
+                                <span class="fw-800 fs-4 text-success" style="font-family: 'Montserrat';">
+                                    Rp {{ total_pemasukan|floatformat:0 }}</span>
                             </div>
 
                             <hr class="my-4">
@@ -204,8 +204,9 @@
                             <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
                                 <span class="text-dark fw-500">{{ stat.metode_pembayaran|default:"Belum Diset" }}</span>
                                 <span>
-                                    <span class="badge bg-secondary px-2 py-1 rounded me-2">{{ stat.jumlah }}x</span>
-                                    <span class="text-success fw-bold">Rp {{ stat.total|floatformat:0 }}</span>
+                                    <span class="badge bg-dark text-white px-2 py-1 rounded me-2">
+                                        {{ stat.jumlah_count }}x</span>
+                                    <span class="text-success fw-bold">Rp {{ stat.total_bayar|floatformat:0 }}</span>
                                 </span>
                             </div>
                             {% empty %}
@@ -219,8 +220,8 @@
             <!-- ACTIONS -->
             <div class="text-center pt-4 border-top">
                 <a href="?periode={{ periode }}&start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&print=true"
-                    class="btn btn-danger btn-print shadow-lg me-2" target="_blank">
-                    <i class="bi bi-file-earmark-pdf me-2"></i> CETAK PDF GABUNGAN
+                    class="btn btn-danger btn-print shadow-lg me-2 text-white" target="_blank">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> CETAK PDF
                 </a>
                 <a href="{% url 'manajer_dashboard' %}" class="btn btn-light btn-print border shadow-sm">
                     <i class="bi bi-arrow-left me-2"></i> KEMBALI

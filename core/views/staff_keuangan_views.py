@@ -19,18 +19,14 @@ def keuangan_dashboard_view(request):
     try:
         karyawan = Karyawan.objects.get(email=request.user.email)
         if karyawan.role != 'staff_keuangan':
-            return redirect('dashboard')
+            return redirect(get_role_redirect_url(request.user))
     except Karyawan.DoesNotExist:
         return redirect('dashboard')
 
     list_tagihan = Pembayaran.objects.filter(
         status_pembayaran='pending'
-    ).filter(
-        Q(metode_pembayaran='Tunai') |  # 1. Yang sudah jelas mau Tunai
-        Q(metode_pembayaran__isnull=True) | # 2. Yang BELUM DIPILIH metodenya (ini biasanya Walk-in)
-        Q(permohonan__metode_pengiriman='Ambil di Kantor') # 3. Yang Walk-in (ambil sendiri)
     ).order_by('created_at')
-    history = Pembayaran.objects.filter(status_pembayaran='paid', updated_at__date=datetime.date.today()).order_by('-updated_at')
+    history = Pembayaran.objects.filter(status_pembayaran='paid').order_by('-updated_at')
     
     context = {
         'list_tagihan': list_tagihan,
@@ -41,7 +37,11 @@ def keuangan_dashboard_view(request):
 
 @login_required(login_url='login')
 def konfirmasi_lunas_view(request, pembayaran_id):
-    if not Karyawan.objects.filter(email=request.user.email, role='staff_keuangan').exists():
+    try:
+        karyawan = Karyawan.objects.get(email=request.user.email)
+        if karyawan.role != 'staff_keuangan':
+            return redirect(get_role_redirect_url(request.user))
+    except Karyawan.DoesNotExist:
         return redirect('dashboard')
         
     if request.method == 'POST': # Pastikan POST
@@ -101,4 +101,20 @@ def konfirmasi_lunas_view(request, pembayaran_id):
         messages.success(request, f"Pembayaran dikonfirmasi & Struk dikirim ke email!")
         return redirect('keuangan_dashboard')
         
-    return redirect('keuangan_dashboard')
+@login_required(login_url='login')
+def cetak_struk_view(request, pembayaran_id):
+    try:
+        karyawan = Karyawan.objects.get(email=request.user.email)
+        if karyawan.role != 'staff_keuangan':
+            return redirect('dashboard')
+    except Karyawan.DoesNotExist:
+        return redirect('dashboard')
+
+    pembayaran = get_object_or_404(Pembayaran, id=pembayaran_id)
+    permohonan = pembayaran.permohonan
+    
+    context = {
+        'pembayaran': pembayaran,
+        'permohonan': permohonan,
+    }
+    return render(request, 'core/staff/cetak_struk.html', context)

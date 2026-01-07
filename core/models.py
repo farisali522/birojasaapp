@@ -107,6 +107,10 @@ class Permohonan(models.Model):
     catatan_pelanggan = models.TextField(blank=True, null=True)
     catatan_penolakan = models.TextField(blank=True, null=True)
     
+    # --- FIELD BARU: DOKUMENTASI HASIL (STNK/BPKB JADI) ---
+    hasil_lapangan = models.FileField(upload_to=get_file_path, max_length=255, blank=True, null=True, verbose_name='Foto Hasil Dokumen')
+    nomor_resi = models.CharField(max_length=50, blank=True, null=True, verbose_name='Nomor Resi Pengiriman')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -121,6 +125,7 @@ class Dokumen(models.Model):
     # Menggunakan FileField dengan fungsi rename otomatis
     path_file = models.FileField(upload_to=get_file_path, max_length=255)
     status_file = models.CharField(max_length=30, default='Digital Diupload')
+    catatan_perbaikan = models.TextField(blank=True, null=True, verbose_name='Catatan Perbaikan')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -146,6 +151,7 @@ class Pembayaran(models.Model):
     metode_pembayaran = models.CharField(max_length=30, blank=True, null=True)
     status_pembayaran = models.CharField(max_length=30, default='pending')
     transaction_id_gateway = models.CharField(max_length=100, blank=True, null=True)
+    bukti_pembayaran = models.FileField(upload_to='bukti_bayar/', blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

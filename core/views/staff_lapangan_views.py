@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import models
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -21,15 +22,46 @@ def lapangan_dashboard_view(request):
     except:
         return redirect('dashboard')
 
-    daftar_tugas = Permohonan.objects.filter(karyawan=karyawan).exclude(status_proses='Selesai').order_by('-updated_at')
-    return render(request, 'core/staff/lapangan_dashboard.html', {'karyawan': karyawan, 'daftar_tugas': daftar_tugas})
+    # Tugas Aktif: Yang statusnya masih progres di lapangan (belum balik kantor/selesai)
+    daftar_tugas = Permohonan.objects.filter(karyawan=karyawan).exclude(
+        status_proses__icontains='Selesai'
+    ).exclude(
+        status_proses='Menunggu Finalisasi'
+    ).exclude(
+        status_proses='Dikirim'
+    ).order_by('-updated_at')
+
+    # Riwayat Tugas: Yang sudah diserahkan balik ke kantor atau sudah beres
+    riwayat_tugas = Permohonan.objects.filter(karyawan=karyawan).filter(
+        models.Q(status_proses__icontains='Selesai') | 
+        models.Q(status_proses='Menunggu Finalisasi') |
+        models.Q(status_proses='Dikirim')
+    ).order_by('-updated_at')
+    
+    context = {
+        'karyawan': karyawan, 
+        'daftar_tugas': daftar_tugas,
+        'riwayat_tugas': riwayat_tugas
+    }
+    return render(request, 'core/staff/lapangan_dashboard.html', context)
 
 @login_required(login_url='login')
 def update_status_lapangan_view(request, permohonan_id):
     permohonan = get_object_or_404(Permohonan, id=permohonan_id)
+    
+    # SECURITY: Prevent modification of finalized tasks
+    if permohonan.status_proses in ['Menunggu Finalisasi', 'Siap Diambil', 'Selesai', 'Dikirim']:
+        messages.error(request, "Tugas ini sudah selesai dan dikunci. Anda tidak bisa mengubahnya lagi.")
+        return redirect('lapangan_dashboard')
     if request.method == 'POST':
         status_baru = request.POST.get('status_baru')
         permohonan.status_proses = status_baru
+        
+        # Tangkap foto dokumen jadi jika diupload
+        foto_hasil = request.FILES.get('hasil_lapangan')
+        if foto_hasil:
+            permohonan.hasil_lapangan = foto_hasil
+            
         permohonan.save()
         
         # 🔥 AUDIT LOG: Status update

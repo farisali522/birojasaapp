@@ -42,8 +42,9 @@
         padding: 12px 24px;
         border-radius: 14px;
         border: none;
-        background: transparent;
-        color: #64748b;
+        background: transparent !important;
+        color: #475569 !important;
+        /* Slate 600 - Darker and readable */
         font-weight: 700;
         font-size: 0.9rem;
         transition: all 0.3s;
@@ -68,20 +69,53 @@
     }
 
     .tab-badge {
-        font-size: 0.7rem;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 2px 8px;
-        border-radius: 20px;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-weight: 800;
+        transition: all 0.3s;
+        background: #f1f5f9;
+        /* Default Abu-abu */
+        color: #94a3b8;
+        /* Default Teks Abu-abu */
     }
 
-    .custom-tab-btn:not(.active) .tab-badge {
-        background: #e2e8f0;
-        color: #64748b;
+    /* INACTIVE STATES - MUTED COLORS */
+    .custom-tab-btn:not(.active) .badge-final {
+        background: #e0f2fe;
+        color: #0369a1;
     }
 
+    .custom-tab-btn:not(.active) .badge-verif {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .custom-tab-btn:not(.active) .badge-bayar {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .custom-tab-btn:not(.active) .badge-tugas {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .custom-tab-btn:not(.active) .badge-revisi {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .custom-tab-btn:not(.active) .badge-monitor {
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    /* ACTIVE STATES - SOLID VIBRANT */
     .custom-tab-btn.active .tab-badge {
-        background: rgba(255, 255, 255, 0.2) !important;
+        background: rgba(255, 255, 255, 0.25) !important;
         color: white !important;
+        transform: scale(1.1);
     }
 
     /* TABLE ENHANCEMENTS */
@@ -114,42 +148,66 @@
     <!-- HEADER SECTION -->
     <div class="d-flex justify-content-between align-items-end mb-5">
         <div>
-            <span class="badge bg-primary-custom text-white px-3 py-2 rounded-pill mb-3 fw-bold"
-                style="font-size: 0.85rem; letter-spacing: 1px;">
+            <span class="badge bg-warning bg-opacity-25 text-dark px-3 py-2 rounded-pill mb-3 fw-bold"
+                style="font-size: 0.85rem; letter-spacing: 1px; border: 1px solid rgba(251, 191, 36, 0.3);">
                 OPERATIONAL HUB</span>
-            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px;">Dashboard Staff</h1>
-            <p class="text-muted fs-5 mb-0">Selamat datang kembali, <strong>
-                    {{ nama_asli }}</strong>. Kelola transaksi hari ini.</p>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px; color: #1e293b;">Dashboard
+                Staff</h1>
+            <p class="text-muted fs-5 mb-0">Selamat datang kembali, <strong>{{ nama_asli }}</strong>. Kelola transaksi
+                hari ini.</p>
         </div>
         <div>
             <a href="{% url 'staff_input_walkin' %}"
-                class="btn btn-primary-custom px-4 py-3 rounded-pill fw-bold shadow-sm">
+                class="btn btn-warning px-4 py-3 rounded-pill fw-bold shadow-sm text-dark border-0"
+                style="background: #fbbf24;">
                 <i class="bi bi-plus-circle me-2"></i> Input Order Walk-in
             </a>
         </div>
     </div>
 
     <!-- TABS NAVIGATION -->
-    <div class="custom-tabs-container">
-        <button class="custom-tab-btn active" id="btn-final" data-bs-toggle="pill" data-bs-target="#pills-final">
+    <div class="custom-tabs-container nav nav-pills" id="pills-tab" role="tablist">
+        <button class="custom-tab-btn nav-link active" id="btn-final" data-bs-toggle="pill"
+            data-bs-target="#pills-final" type="button" role="tab">
             <i class="bi bi-rocket-takeoff"></i>Finalisasi
-            <span class="tab-badge">{{ siap_finalisasi.count }}</span>
+            <span class="tab-badge {% if siap_finalisasi.count > 0 %}badge-final{% endif %}">
+                {{ siap_finalisasi.count }}</span>
         </button>
-        <button class="custom-tab-btn" id="btn-verif" data-bs-toggle="pill" data-bs-target="#pills-verif">
+        <button class="custom-tab-btn nav-link" id="btn-verif" data-bs-toggle="pill" data-bs-target="#pills-verif"
+            type="button" role="tab">
             <i class="bi bi-shield-check"></i>Verifikasi
-            <span class="tab-badge">{{ antrean_verifikasi.count }}</span>
+            <span class="tab-badge {% if antrean_verifikasi.count > 0 %}badge-verif{% endif %}">
+                {{ antrean_verifikasi.count }}</span>
         </button>
-        <button class="custom-tab-btn" id="btn-bayar" data-bs-toggle="pill" data-bs-target="#pills-bayar">
+        <button class="custom-tab-btn nav-link" id="btn-revisi" data-bs-toggle="pill" data-bs-target="#pills-revisi"
+            type="button" role="tab">
+            <i class="bi bi-arrow-repeat"></i>Revisi
+            <span class="tab-badge {% if antrean_revisi.count > 0 %}badge-revisi{% endif %}">
+                {{ antrean_revisi.count }}</span>
+        </button>
+        <button class="custom-tab-btn nav-link" id="btn-bayar" data-bs-toggle="pill" data-bs-target="#pills-bayar"
+            type="button" role="tab">
             <i class="bi bi-wallet2"></i>Pembayaran
-            <span class="tab-badge">{{ menunggu_pembayaran.count }}</span>
+            <span class="tab-badge {% if menunggu_pembayaran.count > 0 %}badge-bayar{% endif %}">
+                {{ menunggu_pembayaran.count }}</span>
         </button>
-        <button class="custom-tab-btn" id="btn-tugas" data-bs-toggle="pill" data-bs-target="#pills-tugas">
+        <button class="custom-tab-btn nav-link" id="btn-tugas" data-bs-toggle="pill" data-bs-target="#pills-tugas"
+            type="button" role="tab">
             <i class="bi bi-person-badge"></i>Penugasan
-            <span class="tab-badge">{{ antrean_penugasan.count }}</span>
+            <span class="tab-badge {% if antrean_penugasan.count > 0 %}badge-tugas{% endif %}">
+                {{ antrean_penugasan.count }}</span>
         </button>
-        <button class="custom-tab-btn" id="btn-monitor" data-bs-toggle="pill" data-bs-target="#pills-monitor">
+        <button class="custom-tab-btn nav-link" id="btn-monitor" data-bs-toggle="pill" data-bs-target="#pills-monitor"
+            type="button" role="tab">
             <i class="bi bi-activity"></i>Monitoring
-            <span class="tab-badge">{{ sedang_berjalan.count }}</span>
+            <span class="tab-badge {% if sedang_berjalan.count > 0 %}badge-monitor{% endif %}">
+                {{ sedang_berjalan.count }}</span>
+        </button>
+        <button class="custom-tab-btn nav-link" id="btn-selesai" data-bs-toggle="pill" data-bs-target="#pills-selesai"
+            type="button" role="tab">
+            <i class="bi bi-check-circle-fill"></i>Selesai
+            <span class="tab-badge text-muted" style="background: #e2e8f0;">
+                {{ riwayat_selesai.count }}</span>
         </button>
     </div>
 
@@ -165,8 +223,8 @@
                             <thead>
                                 <tr>
                                     <th class="ps-4">No. Permohonan</th>
-                                    <th>Petugas Lapangan</th>
-                                    <th>Status Terkini</th>
+                                    <th>Pelanggan</th>
+                                    <th>Layanan & Pengiriman</th>
                                     <th class="text-end pe-4">Aksi</th>
                                 </tr>
                             </thead>
@@ -175,20 +233,25 @@
                                 <tr>
                                     <td class="ps-4 fw-bold text-dark">{{ item.kode_permohonan }}</td>
                                     <td>
-                                        <div class="fw-bold">{{ item.karyawan.nama }}</div>
-                                        <div class="small text-muted">Staff Lapangan</div>
+                                        <div class="fw-bold text-dark">{{ item.pelanggan.nama }}</div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-whatsapp me-1"></i> {{ item.pelanggan.no_whatsapp }}
+                                        </div>
                                     </td>
                                     <td>
-                                        <span
-                                            class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">
-                                            {{ item.status_proses }}
-                                        </span>
+                                        <div class="fw-bold text-dark">{{ item.layanan.nama_layanan }}</div>
+                                        <div class="badge bg-light text-dark border mt-1">
+                                            {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                                            <i class="bi bi-truck me-1"></i> Kurir
+                                            {% else %}
+                                            <i class="bi bi-building me-1"></i> Ambil di Kantor
+                                            {% endif %}
+                                        </div>
                                     </td>
                                     <td class="text-end pe-4">
                                         <a href="{% url 'finalisasi_permohonan' item.id %}"
-                                            class="btn btn-primary-custom btn-action-sm"
-                                            onclick="return confirm('Konfirmasi penerimaan dokumen fisik?')">
-                                            <i class="bi bi-check2-circle me-1"></i> Selesaikan
+                                            class="btn btn-primary-custom btn-action-sm">
+                                            <i class="bi bi-rocket-takeoff me-1"></i> Cek Hasil & Kirim
                                         </a>
                                     </td>
                                 </tr>
@@ -246,6 +309,60 @@
                                     <td colspan="5" class="text-center py-5 text-muted">
                                         <i class="bi bi-inbox fs-1 opacity-25 d-block mb-2"></i>
                                         Antrean verifikasi kosong saat ini.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REVISI -->
+        <div class="tab-pane fade" id="pills-revisi">
+            <div class="card card-master">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-master table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">No. Permohonan</th>
+                                    <th>Data Pelanggan</th>
+                                    <th>Layanan Jasa</th>
+                                    <th>Status Internal</th>
+                                    <th class="text-end pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in antrean_revisi %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">{{ item.kode_permohonan }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ item.pelanggan.nama }}</div>
+                                        <div class="small text-muted">{{ item.pelanggan.email }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-secondary">{{ item.layanan.nama_layanan }}</div>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill fw-bold animate__animated animate__pulse animate__infinite">
+                                            MENUNGGU REVISI PELANGGAN
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'verifikasi_permohonan' item.id %}"
+                                            class="btn btn-light btn-action-sm border rounded-pill">
+                                            Pantau <i class="bi bi-eye ms-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-check2-all fs-1 opacity-25 d-block mb-2"></i>
+                                        Tidak ada permohonan yang sedang di-revisi pelanggan.
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -370,8 +487,17 @@
                                         <div class="small text-muted">Staff Terpilih</div>
                                     </td>
                                     <td>
-                                        <span
-                                            class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill fw-bold">
+                                        <span class="badge 
+                                            {% if 'Lapangan' in item.status_proses %}bg-warning
+                                            {% elif 'Dikirim' in item.status_proses %}bg-info
+                                            {% elif 'Selesai' in item.status_proses %}bg-success
+                                            {% else %}bg-secondary{% endif %} 
+                                            bg-opacity-10 
+                                            {% if 'Lapangan' in item.status_proses %}text-warning
+                                            {% elif 'Dikirim' in item.status_proses %}text-info
+                                            {% elif 'Selesai' in item.status_proses %}text-success
+                                            {% else %}text-secondary{% endif %} 
+                                            px-3 py-2 rounded-pill fw-bold">
                                             {{ item.status_proses }}
                                         </span>
                                     </td>
@@ -392,15 +518,71 @@
         </div>
 
     </div>
+
+    <!-- RIWAYAT SELESAI -->
+    <div class="tab-pane fade" id="pills-selesai">
+        <div class="card card-master">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-master table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">No. Permohonan</th>
+                                <th>Pelanggan</th>
+                                <th>Layanan & Pengiriman</th>
+                                <th class="text-end pe-4">Waktu Selesai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in riwayat_selesai %}
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">{{ item.kode_permohonan }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ item.pelanggan.nama }}</div>
+                                    <div class="small text-muted">{{ item.pelanggan.no_whatsapp }}</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ item.layanan.nama_layanan }}</div>
+                                    <div class="small text-muted">
+                                        {% if item.metode_pengiriman == 'Kirim Kurir' %}
+                                        <i class="bi bi-truck me-1"></i> Kurir ({{ item.nomor_resi }})
+                                        {% else %}
+                                        <i class="bi bi-building me-1"></i> Diambil di Kantor
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="fw-bold text-success">{{ item.updated_at|date:"d M Y" }}</div>
+                                    <div class="small text-muted">{{ item.updated_at|date:"H:i" }}</div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    Belum ada riwayat permohonan selesai.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Handle Custom Tab Clicks
-    document.querySelectorAll('.custom-tab-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            document.querySelectorAll('.custom-tab-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-        });
+    // Tab switching is handled by Bootstrap via data-bs-toggle="pill"
+    // We add this to ensure the active state styling works with our custom classes
+    document.addEventListener('DOMContentLoaded', function () {
+        var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab button'))
+        triggerTabList.forEach(function (triggerEl) {
+            var tabTrigger = new bootstrap.Tab(triggerEl)
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault()
+                tabTrigger.show()
+            })
+        })
     });
 </script>
 {% endblock %}

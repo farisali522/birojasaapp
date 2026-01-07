@@ -104,19 +104,27 @@
                 </div>
                 <div class="col-md-4">
                     <div class="info-label">Alamat / Domisili</div>
-                    <div class="fw-bold text-dark">{{ item.pelanggan.alamat_lengkap|default:"Alamat belum diinput
-                        pelanggan." }}</div>
+                    <div class="fw-bold text-dark">
+                        {{ item.pelanggan.alamat_lengkap|default:"Alamat belum diinput pelanggan." }}</div>
                 </div>
             </div>
 
             <hr class="my-4 opacity-10">
 
+            {% if item.status_proses != 'Menunggu Finalisasi' and item.status_proses != 'Siap Diambil' and
+            item.status_proses != 'Selesai' and item.status_proses != 'Dikirim' %}
             <div class="d-grid mt-2">
                 <a href="{% url 'update_status_lapangan' item.id %}"
                     class="btn btn-primary-custom py-3 rounded-pill fw-bold shadow-lg">
                     <i class="bi bi-arrow-repeat me-1"></i> UPDATE PROGRES TERKINI
                 </a>
             </div>
+            {% else %}
+            <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark fw-bold text-center rounded-3">
+                <i class="bi bi-lock-fill me-1"></i> Tugas ini sudah selesai/final. Anda tidak dapat mengubah status
+                lagi.
+            </div>
+            {% endif %}
         </div>
     </div>
 

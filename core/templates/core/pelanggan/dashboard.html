@@ -202,6 +202,7 @@
                                     <th>Layanan</th>
                                     <th>Tanggal</th>
                                     <th>Status Proses</th>
+                                    <th>Kontak</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -209,8 +210,8 @@
                                 {% for item in permohonan_list %}
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="text-primary-custom fw-bold small">{{ item.kode_permohonan
-                                            }}</span>
+                                        <span class="text-primary-custom fw-bold small">
+                                            {{ item.kode_permohonan }}</span>
                                     </td>
                                     <td>
                                         <div class="fw-bold text-dark">{{ item.layanan.nama_layanan }}</div>
@@ -237,10 +238,35 @@
                                         <span class="status-badge bg-warning bg-opacity-10 text-dark">
                                             <i class="bi bi-credit-card-fill"></i> BUTUH BAYAR
                                         </span>
+                                        {% elif item.status_proses == 'Revisi' %}
+                                        <span
+                                            class="status-badge bg-danger bg-opacity-10 text-danger animate__animated animate__pulse animate__infinite">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> REVISI
+                                        </span>
+                                        {% elif item.status_proses == 'Dikirim' %}
+                                        <span class="status-badge bg-info bg-opacity-10 text-info">
+                                            <i class="bi bi-truck"></i> SEDANG DIKIRIM
+                                        </span>
                                         {% else %}
                                         <span class="status-badge bg-info bg-opacity-10 text-primary">
                                             <i class="bi bi-hourglass-split"></i> {{ item.status_proses|upper }}
                                         </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if item.karyawan %}
+                                        <a href="https://wa.me/{{ item.karyawan.no_whatsapp }}" target="_blank"
+                                            class="btn btn-sm btn-outline-success rounded-pill border-0"
+                                            data-bs-toggle="tooltip" title="Hubungi Petugas ({{ item.karyawan.nama }})">
+                                            <i class="bi bi-whatsapp fs-5"></i>
+                                        </a>
+                                        {% else %}
+                                        <a href="https://wa.me/6281234567890" target="_blank"
+                                            class="btn btn-sm btn-outline-secondary rounded-pill border-0"
+                                            data-bs-toggle="tooltip" title="Hubungi Admin">
+                                            <i class="bi bi-whatsapp fs-5"></i>
+                                        </a>
                                         {% endif %}
                                     </td>
 
@@ -250,6 +276,21 @@
                                             class="btn btn-warning btn-sm rounded-pill fw-bold px-3 shadow-sm">
                                             BAYAR
                                         </a>
+                                        {% elif item.status_proses == 'Revisi' %}
+                                        <a href="{% url 'revisi_pengajuan' item.id %}"
+                                            class="btn btn-danger btn-sm rounded-pill fw-bold px-3 shadow-sm">
+                                            PERBAIKI
+                                        </a>
+                                        {% elif item.status_proses == 'Dikirim' %}
+                                        <form method="POST" action="{% url 'konfirmasi_selesai' item.id %}"
+                                            class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                class="btn btn-success btn-sm rounded-pill fw-bold px-3 shadow-sm"
+                                                onclick="return confirm('Apakah dokumen sudah Anda terima?')">
+                                                TERIMA
+                                            </button>
+                                        </form>
                                         {% else %}
                                         <a href="{% url 'detail_permohonan' item.id %}"
                                             class="btn btn-light btn-sm rounded-pill fw-bold px-3 border shadow-sm text-muted">
@@ -260,7 +301,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-5">
+                                    <td colspan="6" class="text-center py-5">
                                         <div class="mb-4">
                                             <i class="bi bi-folder2-open display-2 text-muted opacity-25"></i>
                                         </div>

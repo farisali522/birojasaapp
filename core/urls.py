@@ -15,12 +15,14 @@ urlpatterns = [
     path('ajukan/', views.pilih_layanan_view, name='pilih_layanan'),
     path('ajukan/<int:layanan_id>/', views.form_pengajuan_view, name='form_pengajuan'),
     path('tagihan/<int:permohonan_id>/', views.tagihan_view, name='tagihan'),
+    path('konfirmasi-selesai/<int:permohonan_id>/', views.konfirmasi_selesai_view, name='konfirmasi_selesai'),
 
     # --- AREA STAFF ADMIN ---
     path('staff/dashboard/', views.staff_dashboard_view, name='staff_dashboard'),
     path('staff/verifikasi/<int:permohonan_id>/', views.verifikasi_permohonan_view, name='verifikasi_permohonan'),
     path('staff/tugaskan/<int:permohonan_id>/', views.tugaskan_staff_view, name='tugaskan_staff'),
     path('staff/finalisasi/<int:permohonan_id>/', views.finalisasi_permohonan_view, name='finalisasi_permohonan'),
+    path('staff/bast/<int:permohonan_id>/', views.cetak_bast_view, name='cetak_bast'),
 
     # --- AREA STAFF LAPANGAN ---
     path('lapangan/dashboard/', views.lapangan_dashboard_view, name='lapangan_dashboard'),
@@ -30,6 +32,7 @@ urlpatterns = [
 
     path('keuangan/dashboard/', views.keuangan_dashboard_view, name='keuangan_dashboard'),
     path('keuangan/lunas/<int:pembayaran_id>/', views.konfirmasi_lunas_view, name='konfirmasi_lunas'),
+    path('keuangan/cetak/<int:pembayaran_id>/', views.cetak_struk_view, name='cetak_struk'),
 
     path('profil/edit/', views.edit_profil_view, name='edit_profil'),
     path('staff/input-walkin/', views.staff_input_walkin_view, name='staff_input_walkin'),

@@ -133,11 +133,72 @@
     }
 
     .btn-transfer {
-        background: rgba(47, 79, 79, 0.05);
+        background: rgba(var(--primary-green-rgb), 0.05);
         color: var(--primary-green);
-        border: 1px solid rgba(47, 79, 79, 0.1);
+        border: 1px solid rgba(var(--primary-green-rgb), 0.1);
         font-weight: 700;
         border-radius: 10px;
+    }
+
+    /* TABS - ALIGNED WITH STAFF DASHBOARD */
+    .custom-tabs-container {
+        background: #f8fafc;
+        padding: 8px;
+        border-radius: 20px;
+        display: inline-flex;
+        gap: 8px;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .custom-tab-btn {
+        padding: 12px 24px;
+        border-radius: 14px;
+        border: none;
+        background: transparent !important;
+        color: #475569 !important;
+        /* Dark Slate - Readable */
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-tab-btn.active {
+        background: var(--primary-green) !important;
+        color: white !important;
+        box-shadow: 0 8px 20px rgba(var(--primary-green-rgb), 0.2);
+    }
+
+    .tab-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    /* BRAND THEME CONSISTENCY */
+    .status-badge-pending {
+        background: rgba(251, 191, 36, 0.1);
+        /* Gold accent */
+        color: var(--accent-gold-hover);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .status-badge-paid {
+        background: rgba(var(--primary-green-rgb), 0.1);
+        color: var(--primary-green);
+        border: 1px solid rgba(var(--primary-green-rgb), 0.2);
+    }
+
+    .row-pending {
+        background-color: rgba(251, 191, 36, 0.02);
+    }
+
+    .row-paid {
+        background-color: rgba(var(--primary-green-rgb), 0.02);
     }
 </style>
 
@@ -145,65 +206,65 @@
     <!-- HEADER SECTION -->
     <div class="d-flex justify-content-between align-items-end mb-5">
         <div>
-            <span class="badge bg-primary-custom text-white px-3 py-2 rounded-pill mb-3 fw-bold"
-                style="font-size: 0.85rem; letter-spacing: 1px;">
+            <span class="badge bg-warning bg-opacity-25 text-dark px-3 py-2 rounded-pill mb-3 fw-bold"
+                style="font-size: 0.85rem; letter-spacing: 1px; border: 1px solid rgba(251, 191, 36, 0.3);">
                 FINANCE HUB</span>
-            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px;">Dashboard Kasir</h1>
+            <h1 class="fw-800 mb-2" style="font-family: 'Montserrat'; letter-spacing: -1.5px; color: #1e293b;">Kasir &
+                Penagihan</h1>
             <p class="text-muted fs-5 mb-0">Petugas Aktif: <strong>{{ karyawan.nama }}</strong>. Kelola transaksi
                 keuangan hari ini.</p>
         </div>
         <div class="text-end pb-1">
             <span class="badge bg-white shadow-sm text-dark px-3 py-2 rounded-pill fw-bold border">
-                <i class="bi bi-clock me-1 text-gold"></i> {{ "now"|date:"l, d M Y" }}
+                <i class="bi bi-clock me-1 text-warning"></i> {{ "now"|date:"l, d M Y" }}
             </span>
         </div>
     </div>
 
     <div class="row g-4 mb-5">
         <div class="col-md-6">
-            <div class="card stat-card bg-white shadow-sm border-start border-warning border-5">
+            <div class="card stat-card bg-white shadow-sm border-start border-5 border-warning">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <i class="bi bi-hourglass-split stat-icon-bg text-warning"></i>
                     <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3"
-                        style="width: 64px; height: 64px; display: flex; align-items:center; justify-content:center;">
-                        <i class="bi bi-wallet2 fs-3"></i>
+                        style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-wallet fs-2"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase letter-spacing-1">PENDING PAYMENT</div>
-                        <h2 class="fw-800 mb-0" style="font-family: 'Montserrat';">{{ list_tagihan.count }} <span
+                        <div class="text-muted small fw-bold text-uppercase">Antrean Pembayaran</div>
+                        <h2 class="fw-800 mb-0">{{ list_tagihan.count }} <span
                                 class="fs-6 opacity-50 fw-normal">Invoice</span></h2>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card stat-card bg-white shadow-sm border-start border-success border-5">
+            <div class="card stat-card bg-white shadow-sm border-start border-5 border-success">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <i class="bi bi-cash-stack stat-icon-bg text-success"></i>
                     <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3"
-                        style="width: 64px; height: 64px; display: flex; align-items:center; justify-content:center;">
-                        <i class="bi bi-check2-circle fs-3"></i>
+                        style="width: 60px; height: 60px; display: flex; align-items:center; justify-content:center;">
+                        <i class="bi bi-check-circle fs-2"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase letter-spacing-1">LUNAS HARI INI</div>
-                        <h2 class="fw-800 mb-0 text-success" style="font-family: 'Montserrat';">{{ history.count }}
-                            <span class="fs-6 opacity-50 fw-normal">Transaksi</span></h2>
+                        <div class="text-muted small fw-bold text-uppercase">Total Lunas</div>
+                        <h2 class="fw-800 mb-0 text-success">{{ history.count }}
+                            <span class="fs-6 opacity-50 fw-normal">Transaksi</span>
+                        </h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TABS NAVIGATION -->
+    <!-- TABS NAVIGATION - ALIGNED WITH STAFF DASHBOARD -->
     <div class="text-center">
         <div class="custom-tabs-container">
             <button class="custom-tab-btn active" id="btn-bayar" data-bs-toggle="pill" data-bs-target="#pills-bayar">
-                <i class="bi bi-receipt-cutoff"></i>Terima Pembayaran
-                <span class="tab-badge">{{ list_tagihan.count }}</span>
+                <i class="bi bi-receipt"></i>Antrean Pembayaran
+                <span class="tab-badge text-bg-warning">{{ list_tagihan.count }}</span>
             </button>
             <button class="custom-tab-btn" id="btn-riwayat" data-bs-toggle="pill" data-bs-target="#pills-riwayat">
                 <i class="bi bi-clock-history"></i>Riwayat Transaksi
-                <span class="tab-badge">{{ history.count }}</span>
+                <span class="tab-badge text-bg-success">{{ history.count }}</span>
             </button>
         </div>
     </div>
@@ -211,45 +272,51 @@
     <!-- TAB CONTENT -->
     <div class="tab-content" id="pills-tabContent">
         <!-- TAB 1: PENDING -->
-        <div class="tab-pane fade show active" id="pills-bayar">
-            <div class="card card-master">
+        <div class="tab-pane fade show active" id="pills-bayar" role="tabpanel" aria-labelledby="pills-bayar-tab">
+            <div class="mb-4">
+                <h4 class="fw-800 text-dark">Daftar Antrean Pembayaran</h4>
+                <p class="text-muted small">Tindak lanjut validasi pembayaran permohonan yang masuk</p>
+            </div>
+            <div class="card card-master border-top border-primary-custom border-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover table-master mb-0">
-                            <thead>
+                            <thead style="background-color: #fff9f0;">
                                 <tr>
-                                    <th class="ps-4">Invoice & Layanan</th>
-                                    <th>Nama Pelanggan</th>
-                                    <th>Nominal Tagihan</th>
-                                    <th>Opsi Pengiriman</th>
-                                    <th class="text-end pe-4">Aksi Konfirmasi</th>
+                                    <th class="ps-4">No. Invoice & Jasa</th>
+                                    <th>Identitas Pelanggan</th>
+                                    <th>Total Tagihan</th>
+                                    <th>Metode</th>
+                                    <th class="text-end pe-4">AKSI KONFIRMASI (KLIK JIKA UANG DITERIMA)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in list_tagihan %}
-                                <tr>
+                                <tr class="row-pending">
                                     <td class="ps-4">
                                         <div class="invoice-title fs-6">{{ item.nomor_invoice }}</div>
-                                        <div class="small text-muted">{{ item.permohonan.layanan.nama_layanan }}</div>
+                                        <div class="small fw-bold text-dark">{{ item.permohonan.layanan.nama_layanan }}
+                                        </div>
+                                        <div class="badge status-badge-pending mt-2 px-2 py-1 rounded small fw-bold">
+                                            ⚠️ BUTUH KONFIRMASI
+                                        </div>
                                     </td>
                                     <td>
-                                        <div class="fw-800 text-dark">{{ item.permohonan.pelanggan.nama }}</div>
+                                        <div class="fw-bold">{{ item.permohonan.pelanggan.nama }}</div>
                                         <div class="small text-muted">{{ item.permohonan.pelanggan.email }}</div>
                                     </td>
                                     <td>
                                         <div class="fw-800 text-dark fs-5">{{ item.total_biaya|rupiah }}</div>
                                     </td>
                                     <td>
-                                        {% if item.permohonan.metode_pengiriman == 'Ambil di Kantor' %}
-                                        <span
-                                            class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill fw-bold border border-info border-opacity-25">
-                                            <i class="bi bi-building me-1"></i> AMBIL KANTOR
+                                        <span class="badge bg-dark bg-opacity-75 text-white px-2 py-1 rounded small">
+                                            {{ item.metode_pembayaran|default:"Belum Pilih" }}
                                         </span>
-                                        {% else %}
-                                        <span
-                                            class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill fw-bold border border-secondary border-opacity-25">
-                                            <i class="bi bi-truck me-1"></i> TERIMA KURIR
-                                        </span>
+                                        {% if item.bukti_pembayaran %}
+                                        <a href="{{ item.bukti_pembayaran.url }}" target="_blank"
+                                            class="d-block mt-1 small text-primary text-decoration-none fw-bold">
+                                            <i class="bi bi-file-earmark-image"></i> LIHAT FOTO BUKTI
+                                        </a>
                                         {% endif %}
                                     </td>
                                     <td class="text-end pe-4">
@@ -257,14 +324,14 @@
                                             class="d-inline-flex gap-2">
                                             {% csrf_token %}
                                             <button type="submit" name="metode" value="Tunai"
-                                                class="btn btn-tunai px-3 py-2"
-                                                onclick="return confirm('Konfirmasi terima TUNAI {{ item.total_biaya|rupiah }}?')">
-                                                <i class="bi bi-cash-coin me-1"></i> TUNAI
+                                                class="btn btn-primary-custom px-3 fw-bold"
+                                                onclick="return confirm('Konfirmasi terima TUNAI?')">
+                                                SAH-KAN TUNAI
                                             </button>
                                             <button type="submit" name="metode" value="Transfer/QRIS Manual"
-                                                class="btn btn-transfer px-3 py-2"
-                                                onclick="return confirm('Konfirmasi TRANSAKSI SESUAI BUKTI TRANSFER?')">
-                                                <i class="bi bi-phone me-1"></i> TRANSFER
+                                                class="btn btn-outline-dark px-3 fw-bold"
+                                                onclick="return confirm('Konfirmasi terima TRANSFER?')">
+                                                SAH-KAN TRANSFER
                                             </button>
                                         </form>
                                     </td>
@@ -272,12 +339,7 @@
                                 {% empty %}
                                 <tr>
                                     <td colspan="5" class="text-center py-5">
-                                        <div class="mb-3">
-                                            <i class="bi bi-check2-all display-3 text-success opacity-25"></i>
-                                        </div>
-                                        <h5 class="fw-800 text-muted" style="font-family: 'Montserrat';">Semua Beres!
-                                        </h5>
-                                        <p class="text-muted">Tidak ada antrean pembayaran pending saat ini.</p>
+                                        <h5 class="text-muted">Tidak ada antrean pembayaran.</h5>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -289,39 +351,57 @@
         </div>
 
         <!-- TAB 2: HISTORY -->
-        <div class="tab-pane fade" id="pills-riwayat">
-            <div class="card card-master">
+        <div class="tab-pane fade" id="pills-riwayat" role="tabpanel" aria-labelledby="pills-riwayat-tab">
+            <div class="mb-4">
+                <h4 class="fw-800 text-dark">Laporan Transaksi Selesai</h4>
+                <p class="text-muted small">Data pembayaran resmi yang sudah divalidasi oleh sistem</p>
+            </div>
+            <div class="card card-master border-top border-primary-custom border-4">
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover table-master mb-0">
-                            <thead>
+                            <thead style="background-color: #f0fdf4;">
                                 <tr>
-                                    <th class="ps-4">Jam Lunas</th>
-                                    <th>Nomor Invoice</th>
-                                    <th>Nama Pelanggan</th>
-                                    <th>Metode Bayar</th>
-                                    <th class="text-end pe-4">Total Dana</th>
+                                    <th class="ps-4">Waktu Lunas</th>
+                                    <th>No. Invoice</th>
+                                    <th>Identitas Pelanggan</th>
+                                    <th>Cara Bayar</th>
+                                    <th>Status Akhir</th>
+                                    <th class="text-end pe-4">Nominal Masuk (SAH)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in history %}
-                                <tr>
-                                    <td class="ps-4 text-muted">{{ item.updated_at|date:"H:i" }}</td>
+                                <tr class="row-paid">
+                                    <td class="ps-4 text-muted small">{{ item.updated_at|date:"d M, H:i" }}</td>
                                     <td class="fw-bold text-dark">{{ item.nomor_invoice }}</td>
-                                    <td>{{ item.permohonan.pelanggan.nama }}</td>
                                     <td>
-                                        <span
-                                            class="badge bg-dark bg-opacity-10 text-dark px-3 py-1 rounded-pill fw-bold">
+                                        <div class="fw-bold">{{ item.permohonan.pelanggan.nama }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-dark bg-opacity-75 text-white px-3 py-1 rounded small">
                                             {{ item.metode_pembayaran|upper }}
                                         </span>
                                     </td>
-                                    <td class="text-end pe-4 fw-800 text-success fs-5">{{ item.total_biaya|rupiah }}
+                                    <td>
+                                        <span class="badge bg-success text-white px-3 py-1 rounded-pill fw-bold">
+                                            LUNAS
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="fw-800 text-success fs-5">{{ item.total_biaya|rupiah }}</div>
+                                        <div class="mt-1 small">
+                                            <a href="{% url 'cetak_struk' item.id %}" target="_blank"
+                                                class="text-primary text-decoration-none fw-bold">
+                                                <i class="bi bi-printer me-1"></i> CETAK ULANG STRUK
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted"> Belum ada transaksi lunas untuk
-                                        hari ini. </td>
+                                    <td colspan="6" class="text-center py-5 text-muted"> Belum ada laporan transaksi
+                                        lunas. </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -334,11 +414,24 @@
 </div>
 
 <script>
-    // Handle Custom Tab Clicks
+    // Script tab untuk finance dashboard (menjamin perpindahan tabel)
     document.querySelectorAll('.custom-tab-btn').forEach(button => {
         button.addEventListener('click', function () {
+            // 1. Matikan tombol lain, aktifkan tombol ini
             document.querySelectorAll('.custom-tab-btn').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
+
+            // 2. Ambil target ID (misal: #pills-riwayat)
+            const targetId = this.getAttribute('data-bs-target');
+
+            // 3. Sembunyikan semua pane, munculkan yang diklik
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
         });
     });
 </script>
