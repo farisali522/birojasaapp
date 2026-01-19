@@ -83,10 +83,17 @@ def staff_input_walkin_view(request):
             layanan_terpilih = Layanan.objects.get(id=layanan_id)
 
             # Search-or-Create Pelanggan
+            # LOGIC BARU: Jika email kosong, generate dummy email
+            if not email:
+                timestamp_str = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+                clean_wa = no_wa.replace('+', '').replace(' ', '')
+                email = f"walkin_{clean_wa}_{timestamp_str}@birojasa.local"
+            
             try:
                 user = User.objects.get(email=email)
                 pelanggan = Pelanggan.objects.get(email=email)
             except User.DoesNotExist:
+                # Generate random password
                 user = User.objects.create_user(username=email, email=email, password=uuid.uuid4().hex[:8])
                 kode_plg = f"PLG-{user.id}"
                 pelanggan = Pelanggan.objects.create(
