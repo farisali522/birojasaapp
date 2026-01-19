@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Pelanggan, Karyawan, Layanan, MasterDokumen, 
     LayananDokumen, Permohonan, Dokumen, Pembayaran,
-    PermohonanAuditLog, PembayaranAuditLog
+    PermohonanAuditLog, PembayaranAuditLog,
+    TahapanLayanan, TahapanPermohonan
 )
 
 @admin.register(Pelanggan)
@@ -15,10 +16,17 @@ class KaryawanAdmin(admin.ModelAdmin):
     list_display = ('kode_karyawan', 'nama', 'role', 'email',)
     list_filter = ('role',)
 
+class TahapanLayananInline(admin.TabularInline):
+    model = TahapanLayanan
+    extra = 1
+    ordering = ['urutan']
+
 @admin.register(Layanan)
 class LayananAdmin(admin.ModelAdmin):
-    list_display = ('kode_layanan', 'nama_layanan', 'harga_jasa', 'estimasi_waktu')
+    list_display = ('kode_layanan', 'nama_layanan', 'harga_jasa', 'estimasi_waktu', 'has_custom_tahapan')
     search_fields = ('nama_layanan',)
+    list_filter = ('has_custom_tahapan',)
+    inlines = [TahapanLayananInline]
 
 @admin.register(MasterDokumen)
 class MasterDokumenAdmin(admin.ModelAdmin):
@@ -29,11 +37,18 @@ class LayananDokumenAdmin(admin.ModelAdmin):
     list_display = ('layanan', 'master_dokumen', 'is_wajib')
     list_filter = ('layanan',)
 
+class TahapanPermohonanInline(admin.TabularInline):
+    model = TahapanPermohonan
+    extra = 0
+    readonly_fields = ('tahapan', 'status', 'updated_by', 'completed_at')
+    ordering = ['tahapan__urutan']
+
 @admin.register(Permohonan)
 class PermohonanAdmin(admin.ModelAdmin):
     list_display = ('kode_permohonan', 'pelanggan', 'layanan', 'status_proses', 'created_at')
     list_filter = ('status_proses', 'layanan')
     search_fields = ('kode_permohonan', 'pelanggan__nama')
+    inlines = [TahapanPermohonanInline]
 
 @admin.register(Dokumen)
 class DokumenAdmin(admin.ModelAdmin):

@@ -33,7 +33,7 @@ hyperframe
 idna
 lxml
 msgpack
-# mysqlclient
+mysqlclient
 oscrypto
 pillow
 proto-plus

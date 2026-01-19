@@ -54,6 +54,7 @@ urlpatterns = [
     path('manajer/master/layanan/add/', views.master_layanan_form_view, name='master_layanan_add'),
     path('manajer/master/layanan/edit/<int:layanan_id>/', views.master_layanan_form_view, name='master_layanan_edit'),
     path('manajer/master/layanan/requirements/<int:layanan_id>/', views.master_layanan_requirements_view, name='master_layanan_requirements'),
+    path('manajer/master/layanan/tahapan/<int:layanan_id>/', views.master_layanan_tahapan_view, name='master_layanan_tahapan'),
 
     path('manajer/master/dokumen/', views.master_dokumen_list_view, name='master_dokumen_list'),
     path('manajer/master/dokumen/add/', views.master_dokumen_form_view, name='master_dokumen_add'),

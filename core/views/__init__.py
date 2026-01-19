@@ -60,6 +60,7 @@ from .manajer_views import (
     master_layanan_list_view,
     master_layanan_form_view,
     master_layanan_requirements_view,
+    master_layanan_tahapan_view,  # NEW: Tahapan BPKB workflow
     master_dokumen_list_view,
     master_dokumen_form_view
 )
@@ -113,6 +114,7 @@ __all__ = [
     'master_layanan_list_view',
     'master_layanan_form_view',
     'master_layanan_requirements_view',
+    'master_layanan_tahapan_view',  # NEW: Tahapan BPKB workflow
     'master_dokumen_list_view',
     'master_dokumen_form_view',
     # Shared

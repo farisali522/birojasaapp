@@ -59,8 +59,10 @@ class Karyawan(models.Model):
 class Layanan(models.Model):
     kode_layanan = models.CharField(max_length=30, unique=True)
     nama_layanan = models.CharField(max_length=100)
+    deskripsi = models.TextField(blank=True, null=True, verbose_name='Deskripsi Layanan')
     harga_jasa = models.PositiveIntegerField(default=0)
     estimasi_waktu = models.CharField(max_length=50, blank=True, null=True)
+    has_custom_tahapan = models.BooleanField(default=False, verbose_name='Gunakan Tahapan Kustom')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -89,6 +91,30 @@ class LayananDokumen(models.Model):
 
     def __str__(self):
         return f"{self.layanan.nama_layanan} butuh {self.master_dokumen.nama_dokumen}"
+
+class TahapanLayanan(models.Model):
+    """
+    Master tahapan untuk setiap jenis layanan.
+    Contoh untuk BPKB: Cek Fisik → Pengesahan → Pendaftaran → Pembayaran → dst
+    """
+    layanan = models.ForeignKey(Layanan, on_delete=models.CASCADE, related_name='tahapan_list')
+    urutan = models.PositiveIntegerField(default=1, verbose_name='Urutan Tahap')
+    nama_tahapan = models.CharField(max_length=100, verbose_name='Nama Tahapan')
+    deskripsi = models.TextField(blank=True, null=True, verbose_name='Deskripsi')
+    is_payment_required = models.BooleanField(default=False, verbose_name='Tahap Pembayaran?')
+    biaya_tahapan = models.PositiveIntegerField(default=0, verbose_name='Biaya Tahapan (Rp)')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['urutan']
+        unique_together = ('layanan', 'urutan')
+        verbose_name = 'Tahapan Layanan'
+        verbose_name_plural = 'Tahapan Layanan'
+    
+    def __str__(self):
+        return f"{self.layanan.nama_layanan} - Tahap {self.urutan}: {self.nama_tahapan}"
 
 # ==========================================
 # 3. ENTITAS TRANSAKSI (DATA AKTIVITAS)
@@ -158,6 +184,37 @@ class Pembayaran(models.Model):
 
     def __str__(self):
         return self.nomor_invoice
+
+class TahapanPermohonan(models.Model):
+    """
+    Tracking progress tahapan untuk setiap permohonan.
+    Setiap permohonan dengan layanan multi-tahap akan memiliki record per tahapan.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Menunggu'),
+        ('in_progress', 'Sedang Diproses'),
+        ('completed', 'Selesai'),
+        ('skipped', 'Dilewati'),
+    ]
+    
+    permohonan = models.ForeignKey(Permohonan, on_delete=models.CASCADE, related_name='progress_tahapan')
+    tahapan = models.ForeignKey(TahapanLayanan, on_delete=models.CASCADE, related_name='progress_list')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    catatan = models.TextField(blank=True, null=True, verbose_name='Catatan')
+    updated_by = models.ForeignKey('Karyawan', on_delete=models.SET_NULL, null=True, blank=True, related_name='tahapan_updates')
+    completed_at = models.DateTimeField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['tahapan__urutan']
+        unique_together = ('permohonan', 'tahapan')
+        verbose_name = 'Progress Tahapan Permohonan'
+        verbose_name_plural = 'Progress Tahapan Permohonan'
+    
+    def __str__(self):
+        return f"{self.permohonan.kode_permohonan} - {self.tahapan.nama_tahapan} ({self.get_status_display()})"
 
 # ==========================================
 # 4. ENTITAS AUDIT TRAIL (TRACKING HISTORY)

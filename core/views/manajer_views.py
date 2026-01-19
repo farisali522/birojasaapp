@@ -15,7 +15,7 @@ import firebase_admin
 from firebase_admin import credentials, auth
 
 # Import Models
-from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, MasterDokumen, LayananDokumen, AktivitasLogin
+from ..models import Pelanggan, Permohonan, Pembayaran, Karyawan, Layanan, MasterDokumen, LayananDokumen, AktivitasLogin, TahapanLayanan
 
 # Import Helpers
 from ..utils import render_to_pdf
@@ -397,18 +397,29 @@ def master_layanan_form_view(request, layanan_id=None):
     
     if request.method == 'POST':
         nama = request.POST.get('nama_layanan')
+        deskripsi = request.POST.get('deskripsi', '')
         harga = request.POST.get('harga_jasa')
         estimasi = request.POST.get('estimasi_waktu')
+        has_custom_tahapan = request.POST.get('has_custom_tahapan') == 'on'
         
         if item:
             item.nama_layanan = nama
+            item.deskripsi = deskripsi
             item.harga_jasa = harga
             item.estimasi_waktu = estimasi
+            item.has_custom_tahapan = has_custom_tahapan
             item.save()
             messages.success(request, "Layanan diupdate.")
         else:
             kode = f"LAY-{Layanan.objects.count() + 1}"
-            Layanan.objects.create(kode_layanan=kode, nama_layanan=nama, harga_jasa=harga, estimasi_waktu=estimasi)
+            Layanan.objects.create(
+                kode_layanan=kode, 
+                nama_layanan=nama, 
+                deskripsi=deskripsi,
+                harga_jasa=harga, 
+                estimasi_waktu=estimasi,
+                has_custom_tahapan=has_custom_tahapan
+            )
             messages.success(request, "Layanan ditambahkan.")
         return redirect('master_layanan_list')
     
@@ -490,3 +501,99 @@ def master_dokumen_form_view(request, doc_id=None):
         return redirect('master_dokumen_list')
     
     return render(request, 'core/manajer/master_dokumen_form.html', {'item': item, 'is_edit': is_edit})
+
+# ==========================================
+# MANAJER VIEWS - TAHAPAN LAYANAN (BPKB WORKFLOW)
+# ==========================================
+
+@login_required(login_url='login')
+@user_passes_test(manajer_check, login_url='dashboard')
+def master_layanan_tahapan_view(request, layanan_id):
+    """
+    Manage tahapan (process stages) for a specific layanan.
+    Used for multi-step workflows like BPKB change process.
+    """
+    layanan = get_object_or_404(Layanan, id=layanan_id)
+    tahapan_list = TahapanLayanan.objects.filter(layanan=layanan).order_by('urutan')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        # Add new tahapan
+        if action == 'add':
+            nama = request.POST.get('nama_tahapan')
+            deskripsi = request.POST.get('deskripsi', '')
+            is_payment = request.POST.get('is_payment_required') == 'on'
+            biaya = request.POST.get('biaya_tahapan') or 0
+            
+            # Calculate next urutan
+            last_urutan = tahapan_list.last()
+            next_urutan = (last_urutan.urutan + 1) if last_urutan else 1
+            
+            TahapanLayanan.objects.create(
+                layanan=layanan,
+                urutan=next_urutan,
+                nama_tahapan=nama,
+                deskripsi=deskripsi,
+                is_payment_required=is_payment,
+                biaya_tahapan=biaya
+            )
+            messages.success(request, f"Tahapan '{nama}' ditambahkan.")
+            return redirect('master_layanan_tahapan', layanan_id=layanan_id)
+        
+        # Edit tahapan
+        elif action == 'edit':
+            tahapan_id = request.POST.get('tahapan_id')
+            tahapan = get_object_or_404(TahapanLayanan, id=tahapan_id, layanan=layanan)
+            tahapan.nama_tahapan = request.POST.get('nama_tahapan')
+            tahapan.deskripsi = request.POST.get('deskripsi', '')
+            tahapan.is_payment_required = request.POST.get('is_payment_required') == 'on'
+            tahapan.biaya_tahapan = request.POST.get('biaya_tahapan') or 0
+            tahapan.save()
+            messages.success(request, "Tahapan diupdate.")
+            return redirect('master_layanan_tahapan', layanan_id=layanan_id)
+        
+        # Delete tahapan
+        elif action == 'delete':
+            tahapan_id = request.POST.get('tahapan_id')
+            TahapanLayanan.objects.filter(id=tahapan_id, layanan=layanan).delete()
+            
+            # Reorder remaining tahapan
+            for idx, t in enumerate(TahapanLayanan.objects.filter(layanan=layanan).order_by('urutan'), 1):
+                t.urutan = idx
+                t.save()
+            
+            messages.success(request, "Tahapan dihapus.")
+            return redirect('master_layanan_tahapan', layanan_id=layanan_id)
+        
+        # Move up
+        elif action == 'move_up':
+            tahapan_id = request.POST.get('tahapan_id')
+            tahapan = get_object_or_404(TahapanLayanan, id=tahapan_id, layanan=layanan)
+            if tahapan.urutan > 1:
+                prev_tahapan = TahapanLayanan.objects.filter(layanan=layanan, urutan=tahapan.urutan - 1).first()
+                if prev_tahapan:
+                    prev_tahapan.urutan = tahapan.urutan
+                    prev_tahapan.save()
+                    tahapan.urutan -= 1
+                    tahapan.save()
+            return redirect('master_layanan_tahapan', layanan_id=layanan_id)
+        
+        # Move down
+        elif action == 'move_down':
+            tahapan_id = request.POST.get('tahapan_id')
+            tahapan = get_object_or_404(TahapanLayanan, id=tahapan_id, layanan=layanan)
+            next_tahapan = TahapanLayanan.objects.filter(layanan=layanan, urutan=tahapan.urutan + 1).first()
+            if next_tahapan:
+                next_tahapan.urutan = tahapan.urutan
+                next_tahapan.save()
+                tahapan.urutan += 1
+                tahapan.save()
+            return redirect('master_layanan_tahapan', layanan_id=layanan_id)
+    
+    context = {
+        'layanan': layanan,
+        'tahapan_list': tahapan_list,
+    }
+    return render(request, 'core/manajer/master_layanan_tahapan.html', context)
+

@@ -1,0 +1,191 @@
+{% extends 'core/shared/base.html' %}
+{% block title %}Kelola Tahapan - {{ layanan.nama_layanan }}{% endblock %}
+{% block content %}
+<style>
+    .step-card {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+    }
+    .step-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .payment-badge {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- BACK BUTTON -->
+            <div class="mb-4">
+                <a href="{% url 'master_layanan_list' %}" class="text-decoration-none text-muted fw-bold small">
+                    <i class="bi bi-arrow-left me-1"></i> KEMBALI KE MASTER LAYANAN
+                </a>
+            </div>
+
+            <!-- HEADER -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-custom text-white rounded-3 d-flex align-items-center justify-content-center me-3"
+                            style="width: 56px; height: 56px;">
+                            <i class="bi bi-diagram-3 fs-3"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-800 mb-1" style="font-family: 'Montserrat';">Kelola Tahapan Proses</h4>
+                            <p class="text-muted mb-0">
+                                <span class="badge bg-secondary">{{ layanan.kode_layanan }}</span>
+                                {{ layanan.nama_layanan }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADD NEW TAHAPAN -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white py-3 px-4 border-0">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Tambah Tahapan Baru</h6>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">NAMA TAHAPAN</label>
+                                <input type="text" name="nama_tahapan" class="form-control" 
+                                    placeholder="Contoh: Cek Fisik Ranmor" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">BIAYA (Rp)</label>
+                                <input type="number" name="biaya_tahapan" class="form-control" 
+                                    placeholder="0" value="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">DESKRIPSI</label>
+                                <textarea name="deskripsi" class="form-control" rows="2"
+                                    placeholder="Deskripsi tahapan (opsional)"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_payment_required" id="addPaymentRequired">
+                                    <label class="form-check-label" for="addPaymentRequired">
+                                        <i class="bi bi-cash-coin me-1"></i> Tahap Pembayaran
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary-custom rounded-pill px-4">
+                                    <i class="bi bi-plus-lg me-1"></i> Tambah Tahapan
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAHAPAN LIST -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-list-ol me-2"></i>Daftar Tahapan ({{ tahapan_list|length }})</h6>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    {% if tahapan_list %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for tahapan in tahapan_list %}
+                        <div class="step-card p-3">
+                            <div class="d-flex align-items-start">
+                                <!-- Step Number -->
+                                <div class="step-number bg-primary-custom text-white me-3">
+                                    {{ tahapan.urutan }}
+                                </div>
+                                
+                                <!-- Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">
+                                                {{ tahapan.nama_tahapan }}
+                                                {% if tahapan.is_payment_required %}
+                                                <span class="badge payment-badge text-white ms-2">
+                                                    <i class="bi bi-cash-coin"></i> Pembayaran
+                                                </span>
+                                                {% endif %}
+                                            </h6>
+                                            {% if tahapan.deskripsi %}
+                                            <p class="text-muted small mb-1">{{ tahapan.deskripsi }}</p>
+                                            {% endif %}
+                                            {% if tahapan.biaya_tahapan > 0 %}
+                                            <span class="badge bg-success-subtle text-success">
+                                                Rp {{ tahapan.biaya_tahapan|floatformat:0 }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Actions -->
+                                        <div class="d-flex gap-1">
+                                            <!-- Move Up -->
+                                            {% if tahapan.urutan > 1 %}
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="move_up">
+                                                <input type="hidden" name="tahapan_id" value="{{ tahapan.id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-circle" title="Pindah Ke Atas">
+                                                    <i class="bi bi-arrow-up"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                            
+                                            <!-- Move Down -->
+                                            {% if not forloop.last %}
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="move_down">
+                                                <input type="hidden" name="tahapan_id" value="{{ tahapan.id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-circle" title="Pindah Ke Bawah">
+                                                    <i class="bi bi-arrow-down"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                            
+                                            <!-- Delete -->
+                                            <form method="POST" class="d-inline" onsubmit="return confirm('Hapus tahapan ini?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="tahapan_id" value="{{ tahapan.id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 opacity-25"></i>
+                        <p class="mt-3 mb-0">Belum ada tahapan. Tambahkan tahapan pertama di atas.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
